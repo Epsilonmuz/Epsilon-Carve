@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="A2Nupn" name="Epsilon Carve" projectType="audioplug" version="0.5.1"
+<JUCERPROJECT id="A2Nupn" name="Epsilon Carve" projectType="audioplug" version="0.5.2"
               companyName="Epsilon Sounds" bundleIdentifier="com.epsilonsounds.carve"
               pluginName="Epsilon Carve" pluginDesc="Collision-aware sidechain EQ"
               pluginManufacturer="Epsilon Sounds" pluginManufacturerCode="EpsS"
@@ -11,6 +11,12 @@
     <GROUP id="e3H9eI" name="Source">
       <FILE id="4VleNp" name="CarveEngine.cpp" compile="1" resource="0" file="Source/CarveEngine.cpp"/>
       <FILE id="ZMBjlO" name="CarveEngine.h" compile="0" resource="0" file="Source/CarveEngine.h"/>
+      <FILE id="UiHd01" name="CarveUI.h" compile="0" resource="0" file="Source/CarveUI.h"/>
+      <FILE id="UiLk01" name="CarveLook.h" compile="0" resource="0" file="Source/CarveLook.h"/>
+      <FILE id="UiCt01" name="CarveControls.h" compile="0" resource="0" file="Source/CarveControls.h"/>
+      <FILE id="UiMh01" name="MeterHub.h" compile="0" resource="0" file="Source/MeterHub.h"/>
+      <FILE id="UiFc01" name="UnmaskFace.h" compile="0" resource="0" file="Source/UnmaskFace.h"/>
+      <FILE id="UiCd01" name="CollisionDisplay.h" compile="0" resource="0" file="Source/CollisionDisplay.h"/>
       <FILE id="zcn550" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="rFrjAx" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>

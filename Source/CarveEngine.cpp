@@ -230,8 +230,18 @@ void Engine::processSamples(const TargetChannels& target, int targetChannels,
     {
         return 1.0f - std::exp(-1.0f / (std::max(1.0f, milliseconds) * 0.001f * sampleRate));
     };
-    const auto attack = timing(settings.attackMs);
-    const auto release = timing(settings.releaseMs);
+    // Each band's attack and release last at least two cycles of its centre frequency. Faster
+    // ballistics follow the waveform itself in low bands and make the cut wobble within each
+    // cycle (audible as distortion on 808s and bass: -42 dB at 40 Hz in v0.5.1).
+    std::array<float, bandCount> attack {}, release {}, smoothing {};
+    for (std::size_t index = 0; index < activeBands; ++index)
+    {
+        const auto twoCyclesMs = 2000.0f / bandCentreHz(index);
+        attack[index] = timing(std::max(settings.attackMs, twoCyclesMs));
+        release[index] = timing(std::max(settings.releaseMs, twoCyclesMs));
+        // Cut changes are smoothed over at least one cycle as well (4 ms above 250 Hz).
+        smoothing[index] = timing(std::max(4.0f, 0.5f * twoCyclesMs));
+    }
     const auto guardTarget = settings.widthGuard ? 0.0f : 1.0f;
 
     const auto stereoTarget = targetChannels > 1 && target[1] != nullptr;
@@ -267,7 +277,7 @@ void Engine::processSamples(const TargetChannels& target, int targetChannels,
             auto level = std::abs(band.triggerState2[0].bandpass(band.triggerState[0].bandpass(keyL, band.detector), band.detector));
             if (stereoTrigger)
                 level = std::max(level, std::abs(band.triggerState2[1].bandpass(band.triggerState[1].bandpass(keyR, band.detector), band.detector)));
-            band.triggerEnvelope += (level > band.triggerEnvelope ? attack : release)
+            band.triggerEnvelope += (level > band.triggerEnvelope ? attack[index] : release[index])
                                     * (level - band.triggerEnvelope);
 
             if constexpr (Collision || Metering)
@@ -283,7 +293,7 @@ void Engine::processSamples(const TargetChannels& target, int targetChannels,
                 auto own = std::abs(band.targetState2[0].bandpass(band.targetState[0].bandpass(inputL, band.detector), band.detector));
                 if (stereoTarget)
                     own = std::max(own, std::abs(band.targetState2[1].bandpass(band.targetState[1].bandpass(inputR, band.detector), band.detector)));
-                band.targetEnvelope += (own > band.targetEnvelope ? attack : release)
+                band.targetEnvelope += (own > band.targetEnvelope ? attack[index] : release[index])
                                        * (own - band.targetEnvelope);
                 }
             }
@@ -292,7 +302,7 @@ void Engine::processSamples(const TargetChannels& target, int targetChannels,
                 band.targetEnvelope = band.triggerEnvelope;
             }
 
-            band.cutWeight += cutSmoothing * (band.desiredWeight - band.cutWeight);
+            band.cutWeight += smoothing[index] * (band.desiredWeight - band.cutWeight);
             if (band.desiredWeight <= 0.0f && band.cutWeight < 1.0e-7f)
                 band.cutWeight = 0.0f;
 

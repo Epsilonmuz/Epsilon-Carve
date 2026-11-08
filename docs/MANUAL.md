@@ -1,6 +1,6 @@
-# Epsilon Carve v0.5.1 — User Manual
+# Epsilon Carve v0.5.2 — User Manual
 
-> The full illustrated manual (recipes, creator's notes, diagrams, annotated screenshots) is **[Epsilon-Carve-v0.5.1-Manual.pdf](Epsilon-Carve-v0.5.0-Manual.pdf)**. This page is the quick text version.
+> The full illustrated manual (recipes, creator's notes, diagrams, annotated screenshots) is **[Epsilon-Carve-v0.5.2-Manual.pdf](Epsilon-Carve-v0.5.0-Manual.pdf)**. This page is the quick text version.
 
 Epsilon Carve makes room for one sound inside another. You put it on the sound that needs to step aside (the **track**, usually the beat or an instrument bus) and feed it the sound that needs space (the **sidechain**, usually the vocal). Whenever the sidechain plays, Carve dips the track at the sidechain's frequencies and lets go when it stops. Nothing is delayed: Carve adds zero latency, so it is safe while recording and monitoring live.
 
@@ -20,6 +20,11 @@ The panel on the left is the quickest way to read Carve.
 - **Clarity %** is how much of the sidechain is clear of the track right now, weighted by where the sidechain is loudest. **Peak cut** shows the deepest cut and its frequency.
 
 How it is calculated: in each of Carve's 32 bands, Carve compares the track's level, after the cut, with the sidechain's level. The sidechain counts as clear when the track is 9 dB or more below it (the clearance Collision aims for) and buried when the track is 3 dB or more above it. Bands are weighted by the sidechain's level (anything more than 36 dB below its loudest band is ignored) and shared between neighbouring slices by how much of each band's frequency span falls in each slice. Shards lift quickly and settle back slowly, and the face holds its last state while the sidechain is silent.
+
+## A/B and edited presets
+
+- **A / B** (next to the Sidechain button): two complete settings. Click **B** to try something without losing **A**; click **A** to go back. The arrow copies the active slot to the other. Both are saved with the session.
+- An **asterisk** after the preset name ("Vocal Space *") means you've changed something since loading it. Pick the preset again to return to it.
 
 ## The display
 
@@ -46,7 +51,7 @@ How it is calculated: in each of Carve's 32 bands, Carve compares the track's le
 
 **Sensitivity** (−48 to +24 dB, default 0 dB). How strongly the sidechain counts. Turn it up for quiet sources (a soft vocal, a distant mic) so they still trigger cuts. Turn it down if Carve reacts to things you don't want it to, such as breaths or bleed. In Collision mode, raising Sensitivity also asks for a little more clearance.
 
-**Attack** (1–150 ms, default 15 ms). How fast the cut arrives when the sidechain comes in. Short (1–5 ms) for kicks and snares, longer (10–20 ms) for vocals so the transients of the beat aren't softened unnecessarily.
+**Attack** (1–150 ms, default 15 ms). How fast the cut arrives when the sidechain comes in. Low bands never react faster than two cycles of their own frequency (50 ms at 40 Hz), so bass and 808 cuts stay steady. Short (1–5 ms) for kicks and snares, longer (10–20 ms) for vocals so the transients of the beat aren't softened unnecessarily.
 
 **Release** (10–1000 ms, default 180 ms). How fast the track recovers after the sidechain stops. Short release follows a rapper's syllables. Long release gives a smoother, less noticeable movement.
 

@@ -12,10 +12,12 @@ struct CarvePreset
     bool widthGuard;
 };
 
-class EpsilonCarveAudioProcessor : public juce::AudioProcessor
+class EpsilonCarveAudioProcessor : public juce::AudioProcessor,
+                                   private juce::AudioProcessorValueTreeState::Listener
 {
 public:
     EpsilonCarveAudioProcessor();
+    ~EpsilonCarveAudioProcessor() override;
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
@@ -54,14 +56,30 @@ public:
 
     static const std::vector<CarvePreset>& presets();
 
+    // True once any control is moved after a preset was loaded (the preset bar shows an asterisk).
+    bool isPresetModified() const noexcept { return presetModified.load(); }
+
+    // A/B: two complete sets of settings to compare. Selecting a slot stores the current settings
+    // in the active slot and recalls the other; both are saved with the session.
+    int getActiveSlot() const noexcept { return activeSlot; }
+    void selectSlot(int slot);
+    void copyActiveSlotToOther();
+
     juce::AudioProcessorValueTreeState params;
 
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout makeLayout();
+    void parameterChanged(const juce::String&, float) override;
+    std::vector<float> captureSettings() const;
+    void applySettings(const std::vector<float>& values);
 
     carve::Engine engine;
     std::atomic<double> sampleRateForDisplay { 44100.0 };
     std::atomic<int> meteringClients { 0 };
     int currentPreset = 0;
+    std::atomic<bool> presetModified { false };
+    bool suppressModified = false;
+    std::array<std::vector<float>, 2> slots;
+    int activeSlot = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EpsilonCarveAudioProcessor)
 };

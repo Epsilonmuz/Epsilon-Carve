@@ -10,7 +10,21 @@
 
 Epsilon Carve is a zero-latency, 32-band sidechain EQ from **Epsilon Sounds**. Put it on the beat, send it the vocal, and it carves space for the vocal in real time. **Collision mode** listens to both tracks and cuts only where the beat is loud enough to cover the vocal. The **Unmask face** shows the result: the face is whatever needs room (a vocal, a kick, a lead), the mask is the track covering it, and each shard of the mask lifts away as Carve clears that part of the spectrum.
 
-**[Download v0.5.1 for Projucer / Xcode](Epsilon-Carve-v0.5.1-Projucer.zip)** (JUCE 9.0.5 included) · [Source only](Epsilon-Carve-v0.5.1-Source.zip) · **[Illustrated manual (PDF, 22 pages)](docs/Epsilon-Carve-v0.5.1-Manual.pdf)** · [Quick manual](docs/MANUAL.md) · [What's new](#whats-new-in-v051) · [FL Studio setup](#fl-studio-setup) · [Build](#build) · [Test results](#test-results)
+**[Download v0.5.2 for Projucer / Xcode](Epsilon-Carve-v0.5.2-Projucer.zip)** (JUCE 9.0.5 included) · [Source only](Epsilon-Carve-v0.5.2-Source.zip) · **[Illustrated manual (PDF, 22 pages)](docs/Epsilon-Carve-v0.5.2-Manual.pdf)** · [Quick manual](docs/MANUAL.md) · [What's new](#whats-new-in-v052) · [FL Studio setup](#fl-studio-setup) · [Build](#build) · [Test results](#test-results)
+
+## What's new in v0.5.2
+
+From the expert review's action plan.
+
+| | |
+| --- | --- |
+| **Steadier lows** | Each band's attack and release now last at least two cycles of its frequency, and its cut changes are smoothed over at least one cycle. Distortion on a 40 Hz tone being carved fell from -42 dB to -75 dB; 808s and bass no longer wobble under a fast attack. |
+| **A/B** | Two complete settings to compare, saved with the session. The arrow copies the active slot to the other. |
+| **Edited preset mark** | The preset name shows an asterisk once you move any control after loading it. |
+| **Colour-blind-safe collision zones** | A fine diagonal hatch, so cuts read by pattern as well as colour. |
+| **Cleaner face** | Lifted shards no longer cross the frequency labels; the "Making room for" button matches the preset menu. |
+| **Readable at every size** | Smallest window is now 85% instead of 75%. |
+| **Under the hood** | The editor is split into focused files (look, meters, face, display, controls). The macOS CI job now runs Apple's `auval` on the AU. |
 
 ## What's new in v0.5.1
 
@@ -49,7 +63,7 @@ Parameter IDs are unchanged since v0.3.0, so saved sessions load.
 | *Advanced:* **Width Guard** | Cut the centre only, keep the sides. | On for wide beats |
 | *Advanced:* **Delta** | Hear only what Carve removes. Turn it off before you bounce. | Off |
 
-Full explanations, including how the face is calculated: **[the illustrated manual](docs/Epsilon-Carve-v0.5.1-Manual.pdf)** or [docs/MANUAL.md](docs/MANUAL.md).
+Full explanations, including how the face is calculated: **[the illustrated manual](docs/Epsilon-Carve-v0.5.2-Manual.pdf)** or [docs/MANUAL.md](docs/MANUAL.md).
 
 ## FL Studio setup
 
@@ -88,4 +102,4 @@ Run on Linux for this release. The Mac build and FL Studio listening pass are st
 - Engine: 32 log-spaced bands, 20 Hz–20 kHz, trapezoidal state-variable filters ([Simper](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf)), constant-octave bandwidth up to Nyquist. Masking-aware cutting follows the idea of masking-reduction EQ (Hafezi & Reiss, [*Autonomous multitrack equalization based on masking reduction*](https://www.aes.org/e-lib/browse.cfm?elib=17637), JAES 2015).
 - Font: Barlow Semi Condensed © The Barlow Project Authors, SIL Open Font License 1.1 (`Resources/Barlow-OFL.txt`).
 
-Older versions: [v0.5.0 Projucer](Epsilon-Carve-v0.5.0-Projucer.zip) · [v0.4.0 Projucer](Epsilon-Carve-v0.4.0-Projucer.zip) · [v0.4.0 source](Epsilon-Carve-v0.4.0-Source.zip) · [v0.3.0 Projucer](Epsilon-Carve-v0.3.0-Projucer.zip) · [v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip) · [v0.2.0](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1](Epsilon-Carve-v0.1-Source.zip)
+Older versions: [v0.5.1 Projucer](Epsilon-Carve-v0.5.1-Projucer.zip) · [v0.5.0 Projucer](Epsilon-Carve-v0.5.0-Projucer.zip) · [v0.4.0 Projucer](Epsilon-Carve-v0.4.0-Projucer.zip) · [v0.4.0 source](Epsilon-Carve-v0.4.0-Source.zip) · [v0.3.0 Projucer](Epsilon-Carve-v0.3.0-Projucer.zip) · [v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip) · [v0.2.0](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1](Epsilon-Carve-v0.1-Source.zip)

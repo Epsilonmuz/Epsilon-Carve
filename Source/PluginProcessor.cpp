@@ -83,6 +83,59 @@ EpsilonCarveAudioProcessor::EpsilonCarveAudioProcessor()
           .withInput("Sidechain", juce::AudioChannelSet::stereo(), false)),
       params(*this, nullptr, "PARAMETERS", makeLayout())
 {
+    for (auto* parameter : getParameters())
+        if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*>(parameter))
+            params.addParameterListener(ranged->getParameterID(), this);
+}
+
+EpsilonCarveAudioProcessor::~EpsilonCarveAudioProcessor()
+{
+    for (auto* parameter : getParameters())
+        if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*>(parameter))
+            params.removeParameterListener(ranged->getParameterID(), this);
+}
+
+void EpsilonCarveAudioProcessor::parameterChanged(const juce::String& id, float)
+{
+    // Delta is a listening aid, not part of a sound, so it never marks a preset as edited.
+    if (!suppressModified && id != "delta")
+        presetModified.store(true);
+}
+
+std::vector<float> EpsilonCarveAudioProcessor::captureSettings() const
+{
+    std::vector<float> values;
+    for (auto* parameter : getParameters())
+        values.push_back(parameter->getValue());
+    return values;
+}
+
+void EpsilonCarveAudioProcessor::applySettings(const std::vector<float>& values)
+{
+    const juce::ScopedValueSetter<bool> quiet(suppressModified, true);
+    const auto& list = getParameters();
+    for (int index = 0; index < list.size() && index < static_cast<int>(values.size()); ++index)
+        if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*>(list[index]))
+            if (ranged->getParameterID() != "delta")
+                ranged->setValueNotifyingHost(values[static_cast<std::size_t>(index)]);
+}
+
+void EpsilonCarveAudioProcessor::selectSlot(int slot)
+{
+    slot = juce::jlimit(0, 1, slot);
+    if (slot == activeSlot)
+        return;
+    slots[static_cast<std::size_t>(activeSlot)] = captureSettings();
+    auto& target = slots[static_cast<std::size_t>(slot)];
+    if (target.empty())
+        target = slots[static_cast<std::size_t>(activeSlot)];   // first visit: B starts as a copy of A
+    activeSlot = slot;
+    applySettings(target);
+}
+
+void EpsilonCarveAudioProcessor::copyActiveSlotToOther()
+{
+    slots[static_cast<std::size_t>(1 - activeSlot)] = captureSettings();
 }
 
 bool EpsilonCarveAudioProcessor::isBusesLayoutSupported(const BusesLayout& layout) const
@@ -172,6 +225,8 @@ void EpsilonCarveAudioProcessor::setCurrentProgram(int index)
         return;
 
     currentPreset = index;
+    const juce::ScopedValueSetter<bool> quiet(suppressModified, true);
+    presetModified.store(false);
     const auto& preset = presets()[static_cast<std::size_t>(index)];
     const auto set = [this](const char* id, float plainValue)
     {
@@ -198,29 +253,63 @@ void EpsilonCarveAudioProcessor::getStateInformation(juce::MemoryBlock& destinat
 {
     auto state = params.copyState();
     state.setProperty("preset", currentPreset, nullptr);
+    state.setProperty("presetModified", presetModified.load(), nullptr);
+    for (auto child = state.getChildWithName("AB"); child.isValid(); child = state.getChildWithName("AB"))
+        state.removeChild(child, nullptr);
+    slots[static_cast<std::size_t>(activeSlot)] = captureSettings();
+    juce::ValueTree ab("AB");
+    ab.setProperty("active", activeSlot, nullptr);
+    for (int slot = 0; slot < 2; ++slot)
+    {
+        juce::StringArray numbers;
+        for (const auto value : slots[static_cast<std::size_t>(slot)])
+            numbers.add(juce::String(value, 6));
+        ab.setProperty(slot == 0 ? "a" : "b", numbers.joinIntoString(","), nullptr);
+    }
+    state.appendChild(ab, nullptr);
     if (auto xml = state.createXml())
         copyXmlToBinary(*xml, destination);
 }
 
 void EpsilonCarveAudioProcessor::setStateInformation(const void* data, int size)
 {
-    if (auto xml = getXmlFromBinary(data, size))
-        if (xml->hasTagName(params.state.getType()))
-        {
-            auto tree = juce::ValueTree::fromXml(*xml);
-            currentPreset = juce::jlimit(0, getNumPrograms() - 1, static_cast<int>(tree.getProperty("preset", 0)));
-            params.replaceState(tree);
+    auto xml = getXmlFromBinary(data, size);
+    if (xml == nullptr || !xml->hasTagName(params.state.getType()))
+        return;
 
-            // replaceState skips parameters whose stored plain value already matches, so a bool or
-            // choice left at an in-between normalised value would not snap. Re-sync every parameter.
-            for (auto* parameter : getParameters())
-                if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*>(parameter))
-                {
-                    const auto stored = ranged->convertTo0to1(ranged->convertFrom0to1(ranged->getValue()));
-                    if (!juce::exactlyEqual(stored, ranged->getValue()))
-                        ranged->setValueNotifyingHost(stored);
-                }
+    auto tree = juce::ValueTree::fromXml(*xml);
+    currentPreset = juce::jlimit(0, getNumPrograms() - 1, static_cast<int>(tree.getProperty("preset", 0)));
+
+    slots = {};
+    activeSlot = 0;
+    if (auto ab = tree.getChildWithName("AB"); ab.isValid())
+    {
+        activeSlot = juce::jlimit(0, 1, static_cast<int>(ab.getProperty("active", 0)));
+        for (int slot = 0; slot < 2; ++slot)
+        {
+            const auto text = ab.getProperty(slot == 0 ? "a" : "b").toString();
+            if (text.isNotEmpty())
+                for (const auto& number : juce::StringArray::fromTokens(text, ",", {}))
+                    slots[static_cast<std::size_t>(slot)].push_back(number.getFloatValue());
         }
+        tree.removeChild(ab, nullptr);
+    }
+
+    {
+        const juce::ScopedValueSetter<bool> quiet(suppressModified, true);
+        params.replaceState(tree);
+
+        // replaceState skips parameters whose stored plain value already matches, so a bool or
+        // choice left at an in-between normalised value would not snap. Re-sync every parameter.
+        for (auto* parameter : getParameters())
+            if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*>(parameter))
+            {
+                const auto stored = ranged->convertTo0to1(ranged->convertFrom0to1(ranged->getValue()));
+                if (!juce::exactlyEqual(stored, ranged->getValue()))
+                    ranged->setValueNotifyingHost(stored);
+            }
+    }
+    presetModified.store(static_cast<bool>(tree.getProperty("presetModified", false)));
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

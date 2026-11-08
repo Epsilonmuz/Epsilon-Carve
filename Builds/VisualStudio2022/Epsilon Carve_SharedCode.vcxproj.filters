@@ -5028,6 +5028,24 @@
     <ClInclude Include="..\..\Source\CarveEngine.h">
       <Filter>Epsilon Carve\Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\CarveUI.h">
+      <Filter>Epsilon Carve\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CarveLook.h">
+      <Filter>Epsilon Carve\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CarveControls.h">
+      <Filter>Epsilon Carve\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\MeterHub.h">
+      <Filter>Epsilon Carve\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\UnmaskFace.h">
+      <Filter>Epsilon Carve\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CollisionDisplay.h">
+      <Filter>Epsilon Carve\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\PluginEditor.h">
       <Filter>Epsilon Carve\Source</Filter>
     </ClInclude>

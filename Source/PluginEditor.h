@@ -2,7 +2,7 @@
 
 #include "PluginProcessor.h"
 
-class CarveLook;
+namespace carveui { class CarveLook; }
 
 // The whole panel is laid out at a fixed design size and scaled as one piece,
 // so it reads the same at every window size.
@@ -22,7 +22,7 @@ private:
     class Panel;
     void timerCallback() override;
 
-    std::unique_ptr<CarveLook> look;
+    std::unique_ptr<carveui::CarveLook> look;
     std::unique_ptr<Panel> panel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EpsilonCarveAudioProcessorEditor)

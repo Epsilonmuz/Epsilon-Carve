@@ -1,5 +1,5 @@
 == Classic, tone trigger = probe (evenness across pitch)
-[PASS] sr 44100: tone cut range -15.56 .. -11.49 dB (spread 4.07 dB, v0.3.0 was ~11 dB)
+[PASS] sr 44100: tone cut range -15.56 .. -11.49 dB (spread 4.06 dB, v0.3.0 was ~11 dB)
 [PASS] sr 48000: tone cut range -15.56 .. -11.45 dB (spread 4.11 dB, v0.3.0 was ~11 dB)
 [PASS] sr 96000: tone cut range -15.56 .. -12.06 dB (spread 3.50 dB, v0.3.0 was ~11 dB)
 == Classic broadband: noise trigger + noise target at 100%
@@ -15,7 +15,7 @@
 [PASS] no collision (target 200 Hz, trigger 3 kHz): -0.00 dB
 == Width Guard
 [PASS] guard off: mid -7.48 dB, side -7.49 dB
-[PASS] guard on: mid -7.48 dB, side 0.000 dB
+[PASS] guard on: mid -7.48 dB, side -0.000 dB
 == Bit-exact and safety
 [PASS] classic Amount 0: 0 differing samples
 [PASS] collision Amount 0: 0 differing samples
@@ -27,7 +27,7 @@
 [PASS] 192 kHz stereo target, mono trigger finite
 [PASS] no sidechain bus -> self (classic) fallback, cut -7.59 dB
 == CPU (48 kHz stereo, 256-sample blocks)
-   classic: 2.99% of one core
-   collision: 3.21% of one core
+   classic: 6.04% of one core
+   collision: 6.45% of one core
 
 0 failure(s)
