@@ -6,7 +6,9 @@
 
 *Editor preview drawn from the v0.3.0 engine's measured sidechain and EQ data.*
 
-**[Download v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip)** · [v0.2.0 source](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1 source](Epsilon-Carve-v0.1-Source.zip)
+**[Download v0.3.0 with Projucer and Xcode](Epsilon-Carve-v0.3.0-Projucer.zip)** · [Lightweight v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip) · [v0.2.0 source](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1 source](Epsilon-Carve-v0.1-Source.zip)
+
+On an Intel Mac, unzip the Projucer package and open `Epsilon-Carve.jucer` in Projucer or open the included Xcode project directly.
 
 [Three controls](#three-controls) · [Read the display](#read-the-display) · [FL Studio setup](#fl-studio-setup) · [Build on macOS](#build-on-macos) · [Validation](#validation)
 
