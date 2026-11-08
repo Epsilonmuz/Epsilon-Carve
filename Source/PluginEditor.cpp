@@ -19,20 +19,26 @@ public:
           mode(*p.params.getParameter("mode")),
           guard("WIDTH GUARD", palette::key, *p.params.getParameter("guard")),
           delta("DELTA", palette::collision, *p.params.getParameter("delta"), "DELTA IS ON"),
-          sidechain("SIDECHAIN: INTERNAL", palette::key, *p.params.getParameter("external"), "SIDECHAIN: EXTERNAL")
+          sidechain(*p.params.getParameter("external"), hub)
     {
         setOpaque(true);
         hub.onUpdate = [this]
         {
             display.repaint();
             face.repaint();
+            sidechain.repaint();
         };
-        for (auto* c : std::initializer_list<juce::Component*> { &display, &face, &mode, &guard, &delta, &sidechain, &advanced, &abSwitch })
+        for (auto* c : std::initializer_list<juce::Component*> { &display, &face, &mode, &guard, &delta, &sidechain, &advanced, &abSwitch, &helpButton })
             addAndMakeVisible(c);
         guard.setTooltip("Carve only the centre (Mid) of the track. The stereo sides keep their width.");
         delta.setTooltip("Hear only what Carve removes. Turn it off before you bounce.");
-        sidechain.setTooltip("EXTERNAL: the routed sidechain (your vocal) drives the cuts.\n"
+        sidechain.setTooltip("EXTERNAL: the routed sidechain (vocal, 808, lead...) drives the cuts. The label shows whether it is arriving:\n"
+                             "LIVE = receiving, SILENT = connected but quiet, NOT ROUTED = the host is not sending it (click ? for help).\n"
                              "INTERNAL: the track carves itself, like a 32-band dynamic EQ.");
+        helpButton.setTooltip("How to connect the sidechain in your DAW");
+        helpButton.onClick = [this] { showHelp(!help.isVisible()); };
+        addChildComponent(help);
+        help.onClose = [this] { showHelp(false); };
         advanced.setTooltip("Show or hide Sensitivity, Attack, Release, Mix, Width Guard and Delta.");
         abSwitch.onSelect = [this](int slot) { processor.selectSlot(slot); syncPreset(); };
         abSwitch.onCopy = [this] { processor.copyActiveSlotToOther(); };
@@ -151,7 +157,7 @@ public:
         g.setFont(font(14.0f, Weight::semibold));
         g.drawText("COLLISION-AWARE SIDECHAIN EQ", 156, 40, 210, 18, juce::Justification::centredLeft);
         g.setColour(palette::dim);
-        g.drawText("v0.5.2", 156, 22, 60, 18, juce::Justification::centredLeft);
+        g.drawText("v" JucePlugin_VersionString, 156, 22, 60, 18, juce::Justification::centredLeft);
 
         g.setColour(palette::edge);
         g.drawHorizontalLine(controlsTop - 6, 22.0f, static_cast<float>(getWidth()) - 22.0f);
@@ -169,9 +175,11 @@ public:
         display.setBounds(302, 66, width - 302 - 22, 318);
 
         const auto toggleY = 392;
-        sidechain.setBounds(22, toggleY, 200, 30);
-        abSwitch.setBounds(236, toggleY, 132, 30);
-        advanced.setBounds(width / 2 - 70, toggleY, 140, 30);
+        sidechain.setBounds(22, toggleY, 214, 30);
+        helpButton.setBounds(sidechain.getRight() + 6, toggleY, 30, 30);
+        abSwitch.setBounds(helpButton.getRight() + 12, toggleY, 132, 30);
+        help.setBounds(22, 66, width - 44, 318);
+        advanced.setBounds(abSwitch.getRight() + 14, toggleY, 140, 30);
         guard.setBounds(width - 22 - 150 - 10 - 150, toggleY, 150, 30);
         delta.setBounds(width - 22 - 150, toggleY, 150, 30);
         layoutKnobs();
@@ -276,6 +284,12 @@ private:
         }
     }
 
+    void showHelp(bool show)
+    {
+        help.setVisible(show);
+        if (show) help.toFront(false);
+    }
+
     void step(int direction)
     {
         const auto count = processor.getNumPrograms();
@@ -288,7 +302,10 @@ private:
     CollisionDisplay display;
     UnmaskFace face;
     ModeSwitch mode;
-    PillToggle guard, delta, sidechain;
+    PillToggle guard, delta;
+    SidechainButton sidechain;
+    juce::TextButton helpButton { "?" };
+    SidechainHelp help;
     AdvancedButton advanced;
     ABSwitch abSwitch;
     std::array<juce::Slider, 7> knobs;
@@ -307,6 +324,7 @@ EpsilonCarveAudioProcessorEditor::EpsilonCarveAudioProcessorEditor(EpsilonCarveA
       panel(std::make_unique<Panel>(p, *look))
 {
     setOpaque(true);
+    setLookAndFeel(look.get());   // menus, buttons and the help page use the Carve look
     addAndMakeVisible(*panel);
     panel->setBounds(0, 0, designWidth, designHeight);
 
@@ -324,6 +342,7 @@ EpsilonCarveAudioProcessorEditor::~EpsilonCarveAudioProcessorEditor()
 {
     stopTimer();
     panel = nullptr;
+    setLookAndFeel(nullptr);
 }
 
 void EpsilonCarveAudioProcessorEditor::paint(juce::Graphics& g)

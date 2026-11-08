@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="A2Nupn" name="Epsilon Carve" projectType="audioplug" version="0.5.2"
+<JUCERPROJECT id="A2Nupn" name="Epsilon Carve" projectType="audioplug" version="0.5.3"
               companyName="Epsilon Sounds" bundleIdentifier="com.epsilonsounds.carve"
               pluginName="Epsilon Carve" pluginDesc="Collision-aware sidechain EQ"
               pluginManufacturer="Epsilon Sounds" pluginManufacturerCode="EpsS"

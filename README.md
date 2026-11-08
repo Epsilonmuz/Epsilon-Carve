@@ -10,9 +10,15 @@
 
 Epsilon Carve is a zero-latency, 32-band sidechain EQ from **Epsilon Sounds**. Put it on the beat, send it the vocal, and it carves space for the vocal in real time. **Collision mode** listens to both tracks and cuts only where the beat is loud enough to cover the vocal. The **Unmask face** shows the result: the face is whatever needs room (a vocal, a kick, a lead), the mask is the track covering it, and each shard of the mask lifts away as Carve clears that part of the spectrum.
 
-**[Download v0.5.2 for Projucer / Xcode](Epsilon-Carve-v0.5.2-Projucer.zip)** (JUCE 9.0.5 included) · [Source only](Epsilon-Carve-v0.5.2-Source.zip) · **[Illustrated manual (PDF, 22 pages)](docs/Epsilon-Carve-v0.5.2-Manual.pdf)** · [Quick manual](docs/MANUAL.md) · [What's new](#whats-new-in-v052) · [FL Studio setup](#fl-studio-setup) · [Build](#build) · [Test results](#test-results)
+**[Download v0.5.3 for Projucer / Xcode](Epsilon-Carve-v0.5.3-Projucer.zip)** (JUCE 9.0.5 included) · [Source only](Epsilon-Carve-v0.5.3-Source.zip) · **[Illustrated manual (PDF, 22 pages)](docs/Epsilon-Carve-v0.5.2-Manual.pdf)** · [Quick manual](docs/MANUAL.md) · [What's new](#whats-new-in-v053) · [FL Studio setup](#fl-studio-setup) · [Build](#build) · [Test results](#test-results)
 
-## What's new in v0.5.2
+## What's new in v0.5.3
+
+- **Sidechain fix for FL Studio.** The sidechain input is now switched on by default. Before, it started switched off, and FL Studio (like some other hosts) never switches on a VST3 sidechain input by itself, so the routed track never reached Carve. Sessions saved with v0.5.2 keep their settings.
+- **The sidechain pill tells you what is happening:** SIDECHAIN: LIVE (receiving), SILENT (connected, source quiet), NOT ROUTED (the host is not sending it), INTERNAL.
+- **? button** next to it: step-by-step sidechain setup for FL Studio, Ableton Live, Logic Pro, Studio One and Reaper.
+
+## What's new in v0.5.2 (previous)
 
 From the expert review's action plan.
 
@@ -70,11 +76,17 @@ Full explanations, including how the face is calculated: **[the illustrated manu
 1. Put **Epsilon Carve** on the Mixer insert you want to carve (for example the beat bus).
 2. Select the **vocal** insert. Right-click the routing arrow under the beat bus and choose **Sidechain to this track**. Keep the vocal's normal route to the master.
 3. In the plugin wrapper, open the gear menu, then **Processing → Connections**. Keep the beat on the main input and assign the vocal to **Sidechain**.
-4. Play both. The badge reads **SIDECHAIN LIVE** and the face lights up. Pick a preset, then raise Amount until the mask lifts where you need it.
+4. Play both. The pill reads **SIDECHAIN: LIVE** and the face lights up. Pick a preset, then raise Amount until the mask lifts where you need it.
+
+**If it is not carving:**
+- Pill says **NOT ROUTED**: the host is not sending Carve's sidechain input. In FL Studio redo step 3 and check the sidechain input's light is on. If you used v0.5.2 or older, update: those versions started with the sidechain input off, which FL Studio never switches on.
+- Pill says **SILENT**: the routing exists but no audio arrives. Check the source track is playing, is not muted, and that step 2 used *Sidechain to this track* on the correct insert.
+- Pill says **INTERNAL**: click it to switch to EXTERNAL.
+- Carving but too little: raise Amount, or Sensitivity in Advanced.
 
 ## Build
 
-**Projucer (recommended):** unzip `Epsilon-Carve-v0.5.0-Projucer.zip` and double-click `Epsilon-Carve.jucer`. JUCE 9.0.5 is bundled, so Projucer opens with everything in place. Choose **Save and Open in IDE**, select **Epsilon Carve - VST3** (or **AU**) and press ⌘B. Both builds copy the plug-in into `~/Library/Audio/Plug-Ins/`. You can also open `Builds/MacOSX/Epsilon Carve.xcodeproj` directly.
+**Projucer (recommended):** unzip `Epsilon-Carve-v0.5.3-Projucer.zip` and double-click `Epsilon-Carve.jucer`. JUCE 9.0.5 is bundled, so Projucer opens with everything in place. Choose **Save and Open in IDE**, select **Epsilon Carve - VST3** (or **AU**) and press ⌘B. Both builds copy the plug-in into `~/Library/Audio/Plug-Ins/`. You can also open `Builds/MacOSX/Epsilon Carve.xcodeproj` directly.
 
 **CMake:**
 

@@ -80,7 +80,9 @@ EpsilonCarveAudioProcessor::EpsilonCarveAudioProcessor()
     : AudioProcessor(BusesProperties()
           .withInput("Input", juce::AudioChannelSet::stereo(), true)
           .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-          .withInput("Sidechain", juce::AudioChannelSet::stereo(), false)),
+          // Enabled by default: FL Studio (and some other hosts) never switch on a VST3 sidechain bus that
+          // starts disabled, so the routed audio never arrived.
+          .withInput("Sidechain", juce::AudioChannelSet::stereo(), true)),
       params(*this, nullptr, "PARAMETERS", makeLayout())
 {
     for (auto* parameter : getParameters())
