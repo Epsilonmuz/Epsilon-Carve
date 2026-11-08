@@ -1,0 +1,33 @@
+== Classic, tone trigger = probe (evenness across pitch)
+[PASS] sr 44100: tone cut range -15.56 .. -11.49 dB (spread 4.07 dB, v0.3.0 was ~11 dB)
+[PASS] sr 48000: tone cut range -15.56 .. -11.45 dB (spread 4.11 dB, v0.3.0 was ~11 dB)
+[PASS] sr 96000: tone cut range -15.56 .. -12.06 dB (spread 3.50 dB, v0.3.0 was ~11 dB)
+== Classic broadband: noise trigger + noise target at 100%
+[PASS] broadband cut -7.51 dB
+== Collision: trigger 1 kHz tone at -12 dBFS, target noise at varying level
+   target tone 0.003 (-50.5 dBFS): cut at 1 kHz 0.00 dB
+   target tone 0.010 (-40.0 dBFS): cut at 1 kHz 0.00 dB
+   target tone 0.030 (-30.5 dBFS): cut at 1 kHz 0.00 dB
+   target tone 0.100 (-20.0 dBFS): cut at 1 kHz -1.38 dB
+   target tone 0.300 (-10.5 dBFS): cut at 1 kHz -9.17 dB
+[PASS] cut deepens monotonically as the target gets louder
+[PASS] quiet target under loud trigger is left alone (0.00 dB)
+[PASS] no collision (target 200 Hz, trigger 3 kHz): -0.00 dB
+== Width Guard
+[PASS] guard off: mid -7.48 dB, side -7.49 dB
+[PASS] guard on: mid -7.48 dB, side 0.000 dB
+== Bit-exact and safety
+[PASS] classic Amount 0: 0 differing samples
+[PASS] collision Amount 0: 0 differing samples
+[PASS] collision, silent sidechain: 0 differing samples
+[PASS] block size 64 vs 997 identical (0 diffs)
+[PASS] +34 dBFS input stays finite (peak 133.8)
+[PASS] +34 dBFS input stays finite (peak 135.8)
+[PASS] 22.05 kHz mono target, stereo trigger finite
+[PASS] 192 kHz stereo target, mono trigger finite
+[PASS] no sidechain bus -> self (classic) fallback, cut -7.59 dB
+== CPU (48 kHz stereo, 256-sample blocks)
+   classic: 1.81% of one core
+   collision: 4.02% of one core
+
+0 failure(s)

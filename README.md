@@ -1,83 +1,79 @@
 # Epsilon Carve
 
-**Make space with three knobs. Set the low and high boundaries, then turn up Amount.**
+**Make room for the vocal. Only where the beat is actually in the way.**
 
-![Epsilon Carve v0.3.0 with Low Cut, a large center Amount knob, and High Cut below the sidechain and applied-cut display](epsilon-carve-v0.3.0-panel.png)
+![Epsilon Carve v0.4.0: amber track spectrum, cyan sidechain spectrum, coral collision zones and the live cut curve above seven controls](docs/epsilon-carve-v0.4.0.png)
 
-*Editor preview drawn from the v0.3.0 engine's measured sidechain and EQ data.*
+*Rendered by the v0.4.0 plugin itself (Vocal Space preset, Amount 65%, synthetic vocal over a beat).*
 
-**[Download v0.3.0 with Projucer and Xcode](Epsilon-Carve-v0.3.0-Projucer.zip)** · [Lightweight v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip) · [v0.2.0 source](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1 source](Epsilon-Carve-v0.1-Source.zip)
+Epsilon Carve is a zero-latency, 32-band sidechain EQ from **Epsilon Sounds**. Put it on the beat, send it the vocal, and it carves space for the vocal in real time. v0.4.0 adds **Collision mode**: Carve listens to *both* tracks and cuts only where the beat is loud enough to cover the vocal, only as deep as it needs to.
 
-On an Intel Mac, unzip the Projucer package and open `Epsilon-Carve.jucer` in Projucer or open the included Xcode project directly.
+**[Download v0.4.0 for Projucer / Xcode](Epsilon-Carve-v0.4.0-Projucer.zip)** (JUCE 9.0.5 included) · [Source only](Epsilon-Carve-v0.4.0-Source.zip) · [User manual](docs/MANUAL.md) · [What's new](#whats-new-in-v040) · [FL Studio setup](#fl-studio-setup) · [Build](#build) · [Test results](#test-results)
 
-[Three controls](#three-controls) · [Read the display](#read-the-display) · [FL Studio setup](#fl-studio-setup) · [Build on macOS](#build-on-macos) · [Validation](#validation)
+## What's new in v0.4.0
 
-Epsilon Carve is a 32-band, sidechain-driven dynamic EQ from **Epsilon Sounds**. Put it on the track you want to make space in. The routed sidechain decides where it cuts, and the two frequency knobs limit where the cuts are applied.
+| | |
+| --- | --- |
+| **Collision mode** (new default) | Measures the track and the sidechain in all 32 bands. A band is cut only when the track would mask the sidechain there, and only far enough to give the sidechain about 9 dB of clearance. Never deeper than Classic mode. |
+| **Width Guard** | Carves only the centre (Mid) of the track. The stereo sides, where pads, reverbs and wide synths live, keep their width. |
+| **Delta** | Hear only what Carve is removing. |
+| **Even cut depth** | v0.3.0's cut varied by about 11 dB depending on where a note fell between bands, and faded above 8 kHz. Now within about 4 dB from 55 Hz to 18 kHz at 44.1, 48 and 96 kHz. |
+| **Sharper detection** | 4th-order band detectors: a loud note no longer registers in bands four octaves away. |
+| **New panel** | Collision display (track, sidechain and collision zones), drag-to-set range handles, all seven controls on the panel, 10 factory presets, scalable window 75–200%. |
+| **Mac build fixes** | JUCE 9.0.5, macOS 12.0 target, Debug optimised to -O3 (the Xcode Build/Run default), universal Release. |
 
-**Version 0.3.0 is a source release.** Build the VST3 below to use it in FL Studio.
+Parameter IDs from v0.3.0 are unchanged, so saved sessions load. New parameters (Mode, Width Guard, Delta) start at their defaults.
 
-## Three controls
+## The controls
 
-| Position | Control | What it does | Default |
-| --- | --- | --- | --- |
-| Left | **Low Cut** | Sets the lowest part of the spectrum that can drive ducking. Raise it to keep the bass out of vocal-triggered cuts. | 20 Hz |
-| Center | **Amount** | Sets the strength of the ducking from 0% to 100%. Start at 25% and increase while listening to the target and trigger together. | 25% |
-| Right | **High Cut** | Sets the upper boundary. Lower it to focus on kick and bass or to leave cymbals and synth air alone. | 20 kHz |
+| Control | What it does | Start at |
+| --- | --- | --- |
+| **Amount** | How hard Carve cuts, 0–100%. | 25–40% |
+| **Low Cut / High Cut** | The frequency range Carve may cut. Drag the white handles on the display or turn the knobs. | 120 Hz / 8 kHz for vocals |
+| **Sensitivity** | How strongly the sidechain counts. Raise it for quiet or distant sources. | 0 dB |
+| **Attack / Release** | How fast the cut arrives and lets go. | 10 ms / 160 ms |
+| **Mix** | Blend of carved and original. | 100% |
+| **Collision / Classic** | Collision cuts only where tracks overlap. Classic cuts wherever the sidechain is loud. | Collision |
+| **Width Guard** | Cut the centre only, keep the sides. | On for vocals over wide beats |
+| **Delta** | Monitor the removed signal only. Turn it off before you bounce. | Off |
+| **Sidechain In / Self Mode** | Use the routed sidechain, or let the track carve itself. | Sidechain In |
 
-Both cutoffs cover 20 Hz to 20 kHz with a logarithmic knob sweep. The cutoff marks and shading update on the graph. If Low Cut reaches or passes High Cut, the active range closes and any existing cut decays.
-
-## Read the display
-
-- **Blue** shows the trigger's measured band levels in dBFS.
-- **White** shows the total EQ cut in dB calculated from the live filter state. It includes overlapping sections and the wet/dry blend.
-- **Shading** shows the range excluded by the cutoff knobs. The white curve shows the EQ's slopes at the edges.
-- **Hover** over a frequency to read the sidechain level and applied cut together.
-
-**EXT / SIGNAL** confirms a detectable external feed. **EXT / QUIET** means the bus is enabled and quiet, so the cut releases as the trigger fades. **EXT INPUT DISABLED / SELF** means the host has disabled the auxiliary input and the target is driving the detector.
+Full explanations, including what happens under the hood: **[docs/MANUAL.md](docs/MANUAL.md)**.
 
 ## FL Studio setup
 
-1. Put **Epsilon Carve VST3** on the Mixer insert you want to carve, such as the **beat bus**.
-2. Select the **vocal** Mixer insert. Right-click the routing arrow at the bottom of the **beat bus** and choose **Sidechain to this track**. Keep the vocal's audible route to the master.
-3. In the plugin wrapper, open the gear and go to **Processing → Connections**. Keep the beat as the main input and assign the **Sidechain** input to the vocal.
-4. Play both tracks. Check for **EXT / SIGNAL** and movement on the blue trace. Set the cutoffs, then dial in Amount while comparing engaged and bypassed at similar loudness.
+1. Put **Epsilon Carve** on the Mixer insert you want to carve (for example the beat bus).
+2. Select the **vocal** insert. Right-click the routing arrow under the beat bus and choose **Sidechain to this track**. Keep the vocal's normal route to the master.
+3. In the plugin wrapper, open the gear menu, then **Processing → Connections**. Keep the beat on the main input and assign the vocal to **Sidechain**.
+4. Play both. The badge on the display reads **SIDECHAIN LIVE** and the cyan trace moves. Pick a preset, then set Amount by ear while toggling bypass.
 
-| Example | Carve on | Trigger from | Low Cut | Amount | High Cut |
-| --- | --- | --- | --- | --- | --- |
-| Vocal space | Beat bus | Lead vocal | 120 Hz | 25% | 6 kHz |
-| Kick space | 808 insert | Kick | 30 Hz | 20% | 200 Hz |
-| Low-mid overlap | Instrument bus | Vocal or lead | 300 Hz | 25% | 420 Hz |
+## Build
 
-[Image-Line Mixer routing](https://cluster.image-line.com/fl-studio-learning/fl-studio-online-manual/html/mixer.htm) · [Image-Line Plugin Wrapper](https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/plugins/wrapper.htm)
+**Projucer (recommended):** unzip `Epsilon-Carve-v0.4.0-Projucer.zip` and double-click `Epsilon-Carve.jucer`. JUCE 9.0.5 is bundled, so Projucer opens with everything in place. Choose **Save and Open in IDE**, select **Epsilon Carve - VST3** (or **AU**) and press ⌘B. Both builds copy the plug-in into `~/Library/Audio/Plug-Ins/`. You can also open `Builds/MacOSX/Epsilon Carve.xcodeproj` directly.
 
-## Build on macOS
-
-Extract the source ZIP and open Terminal in `Epsilon-Carve-v0.3.0`. Install Xcode and CMake 3.22 or later. These commands target an Intel Mac. Skip the clone if the selected JUCE checkout is already in the `JUCE` folder beside `CMakeLists.txt`.
+**CMake:**
 
 ```bash
-git clone --depth 1 --branch 8.0.17-security https://github.com/juce-framework/JUCE.git JUCE
-cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64
-cmake --build build --config Release --target EpsilonCarve_VST3
-find build -type d -name 'Epsilon Carve.vst3' -print
+git clone --depth 1 --branch 9.0.5 https://github.com/juce-framework/JUCE.git JUCE   # skip if JUCE/ is present
+cmake -S . -B build -G Xcode
+cmake --build build --config Release --target EpsilonCarve_VST3 EpsilonCarve_AU
+cmake --build build --config Release --target CarveEngineTests && (cd build && ctest -C Release)
 ```
 
-Copy the entire `.vst3` bundle to `~/Library/Audio/Plug-Ins/VST3/`. In FL Studio open **Options → Manage plugins → Find installed plugins**, then load **Epsilon Carve** in a Mixer effects slot.
+On macOS, a plug-in you built yourself is not quarantined. If you copy a downloaded build from GitHub Actions instead, run `xattr -dr com.apple.quarantine "~/Library/Audio/Plug-Ins/VST3/Epsilon Carve.vst3"`.
 
-[JUCE CMake API](https://github.com/juce-framework/JUCE/blob/8.0.17-security/docs/CMake%20API.md) · [Image-Line plugin installation](https://www.image-line.com/fl-studio-learning-content/fl-studio-online-manual/html/basics_externalplugins.htm)
+## Test results
 
-## Validation
+Run on Linux for this release (the Mac build and FL Studio listening pass are still to be done on Edison's MacBook Pro):
 
-This revision implements the Epsilon Carve research folder's starting design of 32 log-spaced detector bands driving a stable IIR EQ. The filter poles are fixed during playback. The engine smooths changes to the cut and applies one shared curve to stereo channels. Attack, Release, Sensitivity, Mix, and External Sidechain are retained as host parameters and saved state.
+- **pluginval strictness 8**: passed at 44.1, 48 and 96 kHz with 64–1024-sample blocks, including state restoration, parameter fuzzing, bus layouts and editor tests. [Log](docs/pluginval-linux-strictness8.txt)
+- **Engine tests**: 18 of 18 pass. Even cut depth at 44.1/48/96 kHz, Collision behaviour, Width Guard leaves the side channel untouched (0.000 dB), sample-exact output at Amount 0 and with a silent sidechain, identical output for 64- and 997-sample blocks, finite output at +34 dBFS, 22.05–192 kHz, mono and stereo. [Results](docs/engine-test-results.txt)
+- **CPU**: about 2% (Classic) to 3.5% (Collision) of one core at 48 kHz stereo on the build machine. Zero latency.
+- **Collision vs Classic, synthetic vocal over a beat**: for about the same unmasking, Collision removed roughly 25% less of the beat while it was busy (−1.08 dB vs −1.45 dB) and 75% less when the beat dropped by 15 dB (−0.32 dB vs −1.38 dB). This is one synthetic test, not a listening test.
 
-The cutoff IDs and stored frequencies carry over from v0.2.0. Existing normalized cutoff automation maps to different frequencies on the new logarithmic ranges.
+## Notes
 
-| Offline test | Result |
-| --- | --- |
-| Research kit low and high scans | All 32 trigger bands resolved at both 44.1 and 48 kHz, including 20 kHz. |
-| Research kit 997 Hz carrier at 48 kHz | The measured cut and displayed cut both rounded to −2.12 dB. |
-| 300–420 Hz cutoff test at 80% Amount | A 362 Hz tone was cut by 8.32 dB. The 70 Hz, 1.2 kHz, and 8 kHz test tones moved by at most 0.04 dB. |
-| Research kit impulse and silence probes | Amount zero and a quiet connected sidechain produced sample-exact dry output. Changing the block size and meter state produced identical samples. |
+- Epsilon Carve is an original design. It is not affiliated with, and does not reproduce, any other company's product.
+- Engine: 32 log-spaced bands, 20 Hz–20 kHz, trapezoidal state-variable filters ([Simper](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf)), constant-octave bandwidth up to Nyquist. Masking-aware cutting follows the idea of masking-reduction EQ described in the mix-engineering literature (for example Hafezi & Reiss, *Autonomous multitrack equalization based on masking reduction*, JAES 2015).
 
-The processor and editor passed C++17 syntax checks against JUCE 8.0.17-security. Intel Mac VST3 build and FL Studio playback are pending.
-
-[Simper's trapezoidal SVF derivation](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf)
+Older versions: [v0.3.0 Projucer](Epsilon-Carve-v0.3.0-Projucer.zip) · [v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip) · [v0.2.0](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1](Epsilon-Carve-v0.1-Source.zip)

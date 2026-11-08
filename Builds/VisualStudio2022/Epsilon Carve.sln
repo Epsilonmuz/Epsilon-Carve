@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio Version 17
+
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Epsilon Carve - VST3", "Epsilon Carve_VST3.vcxproj", "{F8C525CC-382C-235C-FF94-5DC6BDE084CB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{93809AAD-CC0C-B91A-A3DB-BF8EC8813FC1} = {93809AAD-CC0C-B91A-A3DB-BF8EC8813FC1}
+		{0295F274-A8A8-EC6E-BEFB-3672C25BD090} = {0295F274-A8A8-EC6E-BEFB-3672C25BD090}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Epsilon Carve - Shared Code", "Epsilon Carve_SharedCode.vcxproj", "{93809AAD-CC0C-B91A-A3DB-BF8EC8813FC1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Epsilon Carve - VST3 Manifest Helper", "Epsilon Carve_VST3ManifestHelper.vcxproj", "{0295F274-A8A8-EC6E-BEFB-3672C25BD090}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F8C525CC-382C-235C-FF94-5DC6BDE084CB}.Debug|x64.ActiveCfg = Debug|x64
+		{F8C525CC-382C-235C-FF94-5DC6BDE084CB}.Debug|x64.Build.0 = Debug|x64
+		{F8C525CC-382C-235C-FF94-5DC6BDE084CB}.Release|x64.ActiveCfg = Release|x64
+		{F8C525CC-382C-235C-FF94-5DC6BDE084CB}.Release|x64.Build.0 = Release|x64
+		{93809AAD-CC0C-B91A-A3DB-BF8EC8813FC1}.Debug|x64.ActiveCfg = Debug|x64
+		{93809AAD-CC0C-B91A-A3DB-BF8EC8813FC1}.Debug|x64.Build.0 = Debug|x64
+		{93809AAD-CC0C-B91A-A3DB-BF8EC8813FC1}.Release|x64.ActiveCfg = Release|x64
+		{93809AAD-CC0C-B91A-A3DB-BF8EC8813FC1}.Release|x64.Build.0 = Release|x64
+		{0295F274-A8A8-EC6E-BEFB-3672C25BD090}.Debug|x64.ActiveCfg = Debug|Win32
+		{0295F274-A8A8-EC6E-BEFB-3672C25BD090}.Debug|x64.Build.0 = Debug|Win32
+		{0295F274-A8A8-EC6E-BEFB-3672C25BD090}.Release|x64.ActiveCfg = Release|Win32
+		{0295F274-A8A8-EC6E-BEFB-3672C25BD090}.Release|x64.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
