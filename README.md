@@ -10,7 +10,7 @@
 
 [Three controls](#three-controls) · [Read the display](#read-the-display) · [FL Studio setup](#fl-studio-setup) · [Build on macOS](#build-on-macos) · [Validation](#validation)
 
-Epsilon Carve is a 32-band, sidechain-driven dynamic EQ from **Epsilon Sounds**. Put it on the track you want to make space in. The routed sidechain decides where it cuts, and the two frequency knobs limit where the cuts are applied. The main panel follows the three-knob workflow in the Trackspacer reference.
+Epsilon Carve is a 32-band, sidechain-driven dynamic EQ from **Epsilon Sounds**. Put it on the track you want to make space in. The routed sidechain decides where it cuts, and the two frequency knobs limit where the cuts are applied.
 
 **Version 0.3.0 is a source release.** Build the VST3 below to use it in FL Studio.
 
@@ -76,6 +76,6 @@ The cutoff IDs and stored frequencies carry over from v0.2.0. Existing normalize
 | 300–420 Hz cutoff test at 80% Amount | A 362 Hz tone was cut by 8.32 dB. The 70 Hz, 1.2 kHz, and 8 kHz test tones moved by at most 0.04 dB. |
 | Research kit impulse and silence probes | Amount zero and a quiet connected sidechain produced sample-exact dry output. Changing the block size and meter state produced identical samples. |
 
-The processor and editor passed C++17 syntax checks against JUCE 8.0.17-security. Intel Mac VST3 build, FL Studio playback, and A/B calibration against Trackspacer captures are pending.
+The processor and editor passed C++17 syntax checks against JUCE 8.0.17-security. Intel Mac VST3 build and FL Studio playback are pending.
 
-[Wavesfactory Trackspacer manual](https://www.wavesfactory.com/audio-plugins/manuals/Trackspacer-User-Manual.pdf) · [Simper's trapezoidal SVF derivation](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf)
+[Simper's trapezoidal SVF derivation](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf)
