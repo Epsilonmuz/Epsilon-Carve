@@ -1,5 +1,7 @@
 # Epsilon Carve v0.5.0 — User Manual
 
+> The full illustrated manual (recipes, creator's notes, diagrams, annotated screenshots) is **[Epsilon-Carve-v0.5.0-Manual.pdf](Epsilon-Carve-v0.5.0-Manual.pdf)**. This page is the quick text version.
+
 Epsilon Carve makes room for one sound inside another. You put it on the sound that needs to step aside (the **track**, usually the beat or an instrument bus) and feed it the sound that needs space (the **sidechain**, usually the vocal). Whenever the sidechain plays, Carve dips the track at the sidechain's frequencies and lets go when it stops. Nothing is delayed: Carve adds zero latency, so it is safe while recording and monitoring live.
 
 ## Simple and Advanced views

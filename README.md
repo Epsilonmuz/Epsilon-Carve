@@ -10,7 +10,7 @@
 
 Epsilon Carve is a zero-latency, 32-band sidechain EQ from **Epsilon Sounds**. Put it on the beat, send it the vocal, and it carves space for the vocal in real time. **Collision mode** listens to both tracks and cuts only where the beat is loud enough to cover the vocal. The **Unmask face** shows the result: the face is your vocal, the mask is the beat, and each shard of the mask lifts away as Carve clears that part of the spectrum.
 
-**[Download v0.5.0 for Projucer / Xcode](Epsilon-Carve-v0.5.0-Projucer.zip)** (JUCE 9.0.5 included) · [Source only](Epsilon-Carve-v0.5.0-Source.zip) · [User manual](docs/MANUAL.md) · [What's new](#whats-new-in-v050) · [FL Studio setup](#fl-studio-setup) · [Build](#build) · [Test results](#test-results)
+**[Download v0.5.0 for Projucer / Xcode](Epsilon-Carve-v0.5.0-Projucer.zip)** (JUCE 9.0.5 included) · [Source only](Epsilon-Carve-v0.5.0-Source.zip) · **[Illustrated manual (PDF, 22 pages)](docs/Epsilon-Carve-v0.5.0-Manual.pdf)** · [Quick manual](docs/MANUAL.md) · [What's new](#whats-new-in-v050) · [FL Studio setup](#fl-studio-setup) · [Build](#build) · [Test results](#test-results)
 
 ## What's new in v0.5.0
 
