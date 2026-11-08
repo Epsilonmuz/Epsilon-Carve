@@ -1,71 +1,56 @@
 # Epsilon Carve
 
-**Frequency-aware sidechain ducking with a live 16-band monitor.**
+**Make space with three knobs. Set the low and high boundaries, then turn up Amount.**
 
-![Epsilon Carve v0.2.0 editor illustration showing the trigger and target traces above the carve-weight bars](epsilon-carve-v0.2.0-monitor.png)
+![Epsilon Carve v0.3.0 with Low Cut, a large center Amount knob, and High Cut below the sidechain and applied-cut display](epsilon-carve-v0.3.0-panel.png)
 
-*Editor illustration rendered from a test-signal frame captured by the v0.2.0 DSP.*
+*Editor preview drawn from the v0.3.0 engine's measured sidechain and EQ data.*
 
-**[Download Epsilon Carve v0.2.0 source](Epsilon-Carve-v0.2.0-Source.zip)** · [Previous v0.1 package](Epsilon-Carve-v0.1-Source.zip)
+**[Download v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip)** · [v0.2.0 source](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1 source](Epsilon-Carve-v0.1-Source.zip)
 
-[Live band monitor](#live-band-monitor) · [Controls](#controls) · [FL Studio setup](#fl-studio-setup) · [Starting settings](#starting-settings) · [Build on macOS](#build-on-macos)
+[Three controls](#three-controls) · [Read the display](#read-the-display) · [FL Studio setup](#fl-studio-setup) · [Build on macOS](#build-on-macos) · [Validation](#validation)
 
-Epsilon Carve is an experimental JUCE effect from **Epsilon Sounds**. Insert it on the track you want to make space in, such as a beat bus. Send a second track, such as your vocal, to its sidechain. The detector listens across 16 frequency bands and uses that energy to reduce overlapping bands in the beat.
+Epsilon Carve is a 32-band, sidechain-driven dynamic EQ from **Epsilon Sounds**. Put it on the track you want to make space in. The routed sidechain decides where it cuts, and the two frequency knobs limit where the cuts are applied. The main panel follows the three-knob workflow in the Trackspacer reference.
 
-**Version 0.2.0 is a source release.** Build the VST3 below to open the live monitor. FL Studio validation is pending.
+**Version 0.3.0 is a source release.** Build the VST3 below to use it in FL Studio.
 
-## Live band monitor
+## Three controls
 
-The two lanes share the same 16 frequency positions. Hover a position to read its frequency and all three values together.
+| Position | Control | What it does | Default |
+| --- | --- | --- | --- |
+| Left | **Low Cut** | Sets the lowest part of the spectrum that can drive ducking. Raise it to keep the bass out of vocal-triggered cuts. | 20 Hz |
+| Center | **Amount** | Sets the strength of the ducking from 0% to 100%. Start at 25% and increase while listening to the target and trigger together. | 25% |
+| Right | **High Cut** | Sets the upper boundary. Lower it to focus on kick and bass or to leave cymbals and synth air alone. | 20 kHz |
 
-| Display | What it shows |
-| --- | --- |
-| **Amber trigger trace** | Band levels of the audio feeding the detector, before Sensitivity gain. With External Sidechain active and routed, this is the vocal, kick, or other trigger. |
-| **Pale blue target trace** | Band levels of the target before carving. In the vocal example, this is the beat bus. Compare it with the trigger trace to see which ranges overlap. |
-| **Cyan carve bars** | The actual weight used to subtract each filtered target band, including Amount and Mix. The scale is a percentage of that band contribution. The overlapping filters make the output attenuation dependent on the signal. |
+Both cutoffs cover 20 Hz to 20 kHz with a logarithmic knob sweep. The cutoff marks and shading update on the graph. If Low Cut reaches or passes High Cut, the active range closes and any existing cut decays.
 
-Both input traces show peak dBFS over roughly 33 ms, using the stronger channel. The bars show the strongest applied weight over the same window. Cutoff settings shade excluded bands in the lower lane. A band can still show a short decay after its cutoff changes.
+## Read the display
 
-**Check the routing while playing a vocal over the beat.** The badge should show **EXT / SIGNAL** while the vocal is present. Mute the vocal feed and watch the amber trace fall and the bars release while the pale trace keeps moving. **EXT / QUIET** means the external bus is enabled and effectively silent. **EXT INPUT DISABLED / SELF** means the host disabled the external bus and the target is feeding the detector. Turning External Sidechain off displays **SELF DETECTION**.
+- **Blue** shows the trigger's measured band levels in dBFS.
+- **White** shows the total EQ cut in dB calculated from the live filter state. It includes overlapping sections and the wet/dry blend.
+- **Shading** shows the range excluded by the cutoff knobs. The white curve shows the EQ's slopes at the edges.
+- **Hover** over a frequency to read the sidechain level and applied cut together.
 
-## Controls
-
-| Control | Range and default | How to use it |
-| --- | --- | --- |
-| **Amount** | 0–100% · **40%** | Scales the cuts. Try 25% on a beat bus and raise it until the vocal comes through. The cyan bars settle to zero at 0%. |
-| **Sensitivity** | −48 to +24 dB · **0 dB** | Sets detector gain. Raise it for a quiet sidechain. Lower it if breaths and background noise trigger too much carving. Watch the bars respond while the amber input trace stays at the original level. |
-| **Attack** | 1–150 ms · **15 ms** | Sets how fast the detector rises. Shorten it for a kick hit or lengthen it to let more of the target's leading edge through. |
-| **Release** | 10–1,000 ms · **180 ms** | Sets how fast the detector relaxes. Shorten it if the beat stays tucked between vocal phrases. Lengthen it if the cuts audibly pulse. |
-| **Mix** | 0–100% · **100%** | Blends the dry and processed target. Lower it to reduce the applied cut weight. At 0%, the input traces stay live and the cyan bars show zero. |
-| **Low Cut** | 30–1,000 Hz · **40 Hz** | Excludes cuts below the selected nominal band center. Raise it to keep more bass while carving for a vocal. |
-| **High Cut** | 1,000–20,000 Hz · **16,000 Hz** | Excludes cuts above the selected nominal band center. Lower it to keep cymbal or synth air steadier. |
-| **External Sidechain** | Off/On · **On** | On selects the secondary input when the host enables it. Off selects the target as the trigger. Check the badge to see which route is active. |
+**EXT / SIGNAL** confirms a detectable external feed. **EXT / QUIET** means the bus is enabled and quiet, so the cut releases as the trigger fades. **EXT INPUT DISABLED / SELF** means the host has disabled the auxiliary input and the target is driving the detector.
 
 ## FL Studio setup
 
-1. Insert **Epsilon Carve VST3** in an effects slot on the **beat bus** Mixer insert.
-2. Select the **vocal** Mixer insert. Right-click the routing arrow at the bottom of the **beat bus** insert and choose **Sidechain to this track**. Keep the vocal's audible route to the master.
-3. In the plugin wrapper, open the gear and go to **Processing → Connections**. Keep the main input on the beat bus and map the secondary **Sidechain** input to the vocal. Right-click the input assignment field to select the source by name when available.
-4. Turn **External Sidechain** on. Play both tracks and check the badge and amber trace. If the vocal sounds doubled, set the audible send level to zero so the route feeds only the sidechain.
-5. Start with the settings below. Listen with the effect engaged and bypassed at similar playback levels. The display helps identify the reacting bands while you dial in Amount and timing.
+1. Put **Epsilon Carve VST3** on the Mixer insert you want to carve, such as the **beat bus**.
+2. Select the **vocal** Mixer insert. Right-click the routing arrow at the bottom of the **beat bus** and choose **Sidechain to this track**. Keep the vocal's audible route to the master.
+3. In the plugin wrapper, open the gear and go to **Processing → Connections**. Keep the beat as the main input and assign the **Sidechain** input to the vocal.
+4. Play both tracks. Check for **EXT / SIGNAL** and movement on the blue trace. Set the cutoffs, then dial in Amount while comparing engaged and bypassed at similar loudness.
 
-Image-Line covers the routing and input assignment in its manuals. [Mixer routing](https://cluster.image-line.com/fl-studio-learning/fl-studio-online-manual/html/mixer.htm) · [Plugin Wrapper](https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/plugins/wrapper.htm)
-
-## Starting settings
-
-Use External Sidechain **On**, Sensitivity **0 dB**, and Mix **100%** to start.
-
-| Use | Insert Carve on | Trigger | Amount | Attack / release | Low / high cut |
+| Example | Carve on | Trigger from | Low Cut | Amount | High Cut |
 | --- | --- | --- | --- | --- | --- |
-| **Vocal over beat** | Beat bus | Lead vocal | 25% | 15 / 180 ms | 120 Hz / 6 kHz |
-| **Kick through a rubbery 808** | 808 insert | Kick | 20% | 5 / 100 ms | 40 Hz / 1 kHz |
-| **Lead over a sample** | Sample bus | Lead synth | 20% | 20 / 220 ms | 200 Hz / 5 kHz |
+| Vocal space | Beat bus | Lead vocal | 120 Hz | 25% | 6 kHz |
+| Kick space | 808 insert | Kick | 30 Hz | 20% | 200 Hz |
+| Low-mid overlap | Instrument bus | Vocal or lead | 300 Hz | 25% | 420 Hz |
 
-For the kick and 808, lengthen Attack toward 15 ms if the hit feels too sharp or the bass loses its bounce. When mixing a vocal, reduce Amount or shorten Release if the beat sounds thin between phrases.
+[Image-Line Mixer routing](https://cluster.image-line.com/fl-studio-learning/fl-studio-online-manual/html/mixer.htm) · [Image-Line Plugin Wrapper](https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/plugins/wrapper.htm)
 
 ## Build on macOS
 
-Extract the source ZIP and open Terminal in `Epsilon-Carve-v0.2.0`. Install Xcode and CMake 3.22 or later. Use the following commands on an Intel Mac. Skip the clone command if the selected JUCE version is already in the `JUCE` folder beside `CMakeLists.txt`.
+Extract the source ZIP and open Terminal in `Epsilon-Carve-v0.3.0`. Install Xcode and CMake 3.22 or later. These commands target an Intel Mac. Skip the clone if the selected JUCE checkout is already in the `JUCE` folder beside `CMakeLists.txt`.
 
 ```bash
 git clone --depth 1 --branch 8.0.17-security https://github.com/juce-framework/JUCE.git JUCE
@@ -74,12 +59,23 @@ cmake --build build --config Release --target EpsilonCarve_VST3
 find build -type d -name 'Epsilon Carve.vst3' -print
 ```
 
-Copy the entire `.vst3` bundle to `~/Library/Audio/Plug-Ins/VST3/`. In FL Studio open **Options → Manage plugins → Find installed plugins** and load **Epsilon Carve** in a Mixer effects slot.
+Copy the entire `.vst3` bundle to `~/Library/Audio/Plug-Ins/VST3/`. In FL Studio open **Options → Manage plugins → Find installed plugins**, then load **Epsilon Carve** in a Mixer effects slot.
 
-[JUCE CMake API](https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md) · [Image-Line plugin installation](https://www.image-line.com/fl-studio-learning-content/fl-studio-online-manual/html/basics_externalplugins.htm)
+[JUCE CMake API](https://github.com/juce-framework/JUCE/blob/8.0.17-security/docs/CMake%20API.md) · [Image-Line plugin installation](https://www.image-line.com/fl-studio-learning-content/fl-studio-online-manual/html/basics_externalplugins.htm)
 
-## Validation and limits
+## Validation
 
-The DSP tests covered separate trigger and target tones, cutoff gating, silent external input, self-detection, and meter handoff. At 44.1, 48, and 96 kHz the comparison signals matched the v0.1 processing equation sample for sample, with the monitor enabled and disabled. The JUCE processor and editor passed compiler syntax checks against JUCE 8.0.17-security. The Intel macOS VST3 build and FL Studio playback still need testing.
+This revision implements the Epsilon Carve research folder's starting design of 32 log-spaced detector bands driving a stable IIR EQ. The filter poles are fixed during playback. The engine smooths changes to the cut and applies one shared curve to stereo channels. Attack, Release, Sensitivity, Mix, and External Sidechain are retained as host parameters and saved state.
 
-The monitor uses the same band filters as the DSP. It shows nominal centers from 60 Hz to 14 kHz. Actual centers are capped at 12% of the sample rate, so upper bands can share the same filter response. Hovering those bands shows both the nominal frequency and the capped center. The current monitor measures these 16 bands.
+The cutoff IDs and stored frequencies carry over from v0.2.0. Existing normalized cutoff automation maps to different frequencies on the new logarithmic ranges.
+
+| Offline test | Result |
+| --- | --- |
+| Research kit low and high scans | All 32 trigger bands resolved at both 44.1 and 48 kHz, including 20 kHz. |
+| Research kit 997 Hz carrier at 48 kHz | The measured cut and displayed cut both rounded to −2.12 dB. |
+| 300–420 Hz cutoff test at 80% Amount | A 362 Hz tone was cut by 8.32 dB. The 70 Hz, 1.2 kHz, and 8 kHz test tones moved by at most 0.04 dB. |
+| Research kit impulse and silence probes | Amount zero and a quiet connected sidechain produced sample-exact dry output. Changing the block size and meter state produced identical samples. |
+
+The processor and editor passed C++17 syntax checks against JUCE 8.0.17-security. Intel Mac VST3 build, FL Studio playback, and A/B calibration against Trackspacer captures are pending.
+
+[Wavesfactory Trackspacer manual](https://www.wavesfactory.com/audio-plugins/manuals/Trackspacer-User-Manual.pdf) · [Simper's trapezoidal SVF derivation](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf)
