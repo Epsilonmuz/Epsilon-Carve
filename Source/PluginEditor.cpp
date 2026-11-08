@@ -52,9 +52,28 @@ constexpr int tracePoints = 240;
 constexpr int fftOrder = 12;
 constexpr int fftSize = 1 << fftOrder;
 constexpr int faceRegions = 8;
-// Mask shards from the forehead (air) down to the chin (lows).
-constexpr std::array<float, faceRegions + 1> regionEdgesHz { 20000.0f, 8000.0f, 4000.0f, 2000.0f, 1000.0f,
-                                                            500.0f, 250.0f, 100.0f, 20.0f };
+constexpr float rowTop = 26.0f, rowHeight = 24.5f;   // face design space: rows from 26 to 222
+// The face is a frequency axis, top to bottom on a log scale: eight equal slices of 20 Hz-20 kHz
+// (1.25 octaves each). Region 0 (forehead) = the highest slice, region 7 (chin) = the lowest.
+float regionLowPos(std::size_t region) noexcept { return static_cast<float>(faceRegions - 1 - region) / faceRegions; }
+float regionHighPos(std::size_t region) noexcept { return static_cast<float>(faceRegions - region) / faceRegions; }
+juce::String edgeLabel(float position)
+{
+    const auto f = carve::frequencyAt(position);
+    if (f >= 9950.0f) return juce::String(juce::roundToInt(f / 1000.0f)) + "k";
+    if (f >= 1000.0f) return juce::String(f / 1000.0f, 1) + "k";
+    return juce::String(juce::roundToInt(f));
+}
+
+const std::array<const char*, 7> sourceNames { "VOCAL", "KICK", "SNARE", "808 / BASS", "LEAD", "VOICE-OVER", "SIDECHAIN" };
+const std::array<const char*, 7> sourceWords { "vocal", "kick", "snare", "808", "lead", "voice", "sidechain" };
+const std::array<const char*, 7> sourceHints { "try Vocal Space or Rap Vocal Pocket", "try Kick Through 808 (Classic)",
+                                               "try Snare Pocket (Classic)", "try Clean Low Mids, then set the range",
+                                               "try Lead Over Beat", "try Voice-Over Bed", "any preset" };
+int sourceIndex(const juce::AudioProcessorValueTreeState& state)
+{
+    return juce::jlimit(0, 6, static_cast<int>(state.state.getProperty("sourceName", 0)));
+}
 }
 
 //==============================================================================
@@ -222,7 +241,8 @@ public:
     carve::MeterFrame frame;
     bool hasFrame = false;
     std::array<float, tracePoints> trackDb {}, keyDb {}, cutDb {}, sideCutDb {};
-    std::array<float, faceRegions> regionPresence {}, regionTarget {};
+    std::array<float, faceRegions> regionPresence {}, regionTarget {}, regionActivity {};
+    std::array<bool, faceRegions> regionActive {};
     float clarity = 0.0f, clarityShown = 0.0f;
     bool vocalPresent = false;
     float maxCut = 0.0f, maxCutFrequency = 0.0f;
@@ -256,6 +276,7 @@ private:
         {
             const auto rate = regionTarget[r] < regionPresence[r] ? 0.22f : 0.08f;
             regionPresence[r] += rate * (regionTarget[r] - regionPresence[r]);
+            regionActivity[r] += 0.12f * ((regionActive[r] ? 1.0f : 0.0f) - regionActivity[r]);
         }
         clarityShown += 0.15f * (clarity - clarityShown);
 
@@ -353,49 +374,51 @@ private:
 
         vocalPresent = true;
         std::array<float, faceRegions> weight {}, masked {}, maskedBefore {};
-        float totalWeight = 0.0f, totalMasked = 0.0f, totalBefore = 0.0f;
+        float totalWeight = 0.0f, totalMasked = 0.0f;
         for (std::size_t b = 0; b < carve::bandCount; ++b)
         {
             const auto w = juce::jlimit(0.0f, 1.0f, (trigger[b] - (loudest - 36.0f)) / 36.0f);
             if (w <= 0.0f)
                 continue;
-            // 0 = the vocal is clear (beat 9 dB or more below it), 1 = buried (beat 3 dB or more above it).
-            // The clear point matches Collision mode's 9 dB clearance target.
+            // 0 = the sidechain is clear (track 9 dB or more below it), 1 = buried (track 3 dB or more
+            // above it). The clear point matches Collision mode's 9 dB clearance target.
             const auto buried = [&](float cutDbHere)
             {
                 return juce::jlimit(0.0f, 1.0f, (target[b] + cutDbHere - trigger[b] + 9.0f) / 12.0f);
             };
             const auto d = buried(cut[b]), before = buried(0.0f);
-            const auto centre = carve::bandCentreHz(b);
-            std::size_t region = faceRegions - 1;
-            for (std::size_t r = 0; r < faceRegions; ++r)
-                if (centre <= regionEdgesHz[r] && centre > regionEdgesHz[r + 1])
-                    region = r;
-            weight[region] += w;
-            masked[region] += w * d;
-            maskedBefore[region] += w * before;
             totalWeight += w;
             totalMasked += w * d;
-            totalBefore += w * before;
+            // A band covers a slice of the log axis; it counts towards each face region by how much
+            // of that slice falls inside the region, so a band on a boundary is shared, not rounded.
+            const auto cellLow = juce::jmax(0.0f, (static_cast<float>(b) - 0.5f) / 31.0f);
+            const auto cellHigh = juce::jmin(1.0f, (static_cast<float>(b) + 0.5f) / 31.0f);
+            for (std::size_t r = 0; r < faceRegions; ++r)
+            {
+                const auto overlap = juce::jmax(0.0f, juce::jmin(cellHigh, regionHighPos(r)) - juce::jmax(cellLow, regionLowPos(r)))
+                                     / (cellHigh - cellLow);
+                if (overlap <= 0.0f)
+                    continue;
+                weight[r] += w * overlap;
+                masked[r] += w * overlap * d;
+                maskedBefore[r] += w * overlap * before;
+            }
         }
         if (totalWeight <= 0.0f)
             return;
 
-        // Clarity is absolute: how much of the vocal is clear of the beat right now.
+        // Clarity is absolute: how much of the sidechain is clear of the track right now.
         clarity = 1.0f - totalMasked / totalWeight;
-        // The mask shows how much of the original masking is still left: whole at Amount 0,
-        // lifting shard by shard as Carve clears each range. Shaped (^1.6) so progress is easy to see.
-        const auto remaining = [](float after, float before)
-        {
-            return before > 0.02f ? std::pow(juce::jlimit(0.0f, 1.0f, after / before), 1.6f) : 0.0f;
-        };
-        const auto overall = remaining(totalMasked, totalBefore);
+        // Each shard shows only its own range: the share of that range's original masking that is
+        // still left (1 = untouched, 0 = all removed). A range where the sidechain has almost nothing
+        // is marked inactive and drawn as a faint outline instead of borrowing a value from elsewhere.
         for (std::size_t r = 0; r < faceRegions; ++r)
         {
-            // Regions where the vocal has little energy follow the overall picture.
-            const auto blend = juce::jlimit(0.0f, 1.0f, weight[r] / 0.6f);
-            const auto own = weight[r] > 0.0f ? remaining(masked[r], maskedBefore[r]) : overall;
-            regionTarget[r] = blend * own + (1.0f - blend) * overall;
+            regionActive[r] = weight[r] > 0.15f;
+            if (!regionActive[r])
+                continue;
+            regionTarget[r] = maskedBefore[r] > 0.02f * weight[r]
+                                ? juce::jlimit(0.0f, 1.0f, masked[r] / maskedBefore[r]) : 0.0f;
         }
     }
 
@@ -412,13 +435,30 @@ private:
 class UnmaskFace final : public juce::Component, public juce::SettableTooltipClient
 {
 public:
-    UnmaskFace(MeterHub& meterHub, juce::AudioProcessorValueTreeState& state) : hub(meterHub), params(state)
+    UnmaskFace(MeterHub& meterHub, juce::AudioProcessorValueTreeState& state, juce::LookAndFeel& look)
+        : hub(meterHub), params(state)
     {
         setOpaque(true);
-        setTooltip("The face is your sidechain (the vocal). The mask is the track covering it.\n"
-                   "Each shard is one frequency range, air at the top, lows at the chin.\n"
-                   "Turn up Amount and watch the shards lift as each range is unmasked.");
+        setTooltip("The face is your sidechain: the sound that needs room. The mask is the track covering it.\n"
+                   "The face is a frequency scale: 20 kHz at the top, 20 Hz at the chin, eight equal slices.\n"
+                   "Each shard lifts by exactly how much of its slice's masking Carve has removed.");
         buildArt();
+        source.setLookAndFeel(&look);
+        source.setTooltip("What is in the sidechain? This only changes the labels.");
+        source.onClick = [this] { showSourceMenu(); };
+        addAndMakeVisible(source);
+        refreshSource();
+    }
+
+    ~UnmaskFace() override { source.setLookAndFeel(nullptr); }
+
+    void resized() override { source.setBounds(getWidth() - 16 - 128, 9, 128, 24); }
+
+    void refreshSource()
+    {
+        const auto index = sourceIndex(params);
+        source.setButtonText(juce::String(sourceNames[static_cast<std::size_t>(index)]) + juce::String(juce::CharPointer_UTF8("  \xe2\x96\xbe")));
+        repaint();
     }
 
     void paint(juce::Graphics& g) override
@@ -452,6 +492,7 @@ public:
 
         paintFace(g, art, scale, external ? 1.0f : 0.45f);
         paintMask(g, art, scale, external);
+        paintScale(g, art);
         paintCaption(g, bounds, external, delta);
     }
 
@@ -536,7 +577,10 @@ private:
         }
 
         // Shards: eight jagged bands (top = air, bottom = lows), each split by a crack down the middle.
-        const std::array<float, faceRegions + 1> rows { 26.0f, 58.0f, 84.0f, 104.0f, 126.0f, 148.0f, 170.0f, 192.0f, 222.0f };
+        // Equal rows: the face is a log frequency axis, so each 1.25-octave slice gets the same height.
+        std::array<float, faceRegions + 1> rows {};
+        for (std::size_t row = 0; row <= faceRegions; ++row)
+            rows[row] = rowTop + static_cast<float>(row) * rowHeight;
         juce::Random random(7);
         std::array<std::array<float, 9>, faceRegions + 1> jag {};
         for (auto& row : jag)
@@ -603,11 +647,14 @@ private:
     {
         for (std::size_t s = 0; s < shards.size(); ++s)
         {
+            // A shard's lift is exactly its range's share of masking removed (linear); it stays solid
+            // while it moves and fades only over the last third. Inactive ranges sit in place, faint.
+            const auto activity = external ? hub.regionActivity[s / 2] : 1.0f;
             const auto presence = external ? juce::jlimit(0.0f, 1.0f, hub.regionPresence[s / 2]) : 1.0f;
-            // Shards stay solid while they lift away, and only fade on the last stretch.
-            const auto progress = juce::jlimit(0.0f, 1.0f, (0.95f - presence) / 0.85f);
+            const auto progress = (1.0f - presence) * activity;
             const auto lift = progress * progress * (3.0f - 2.0f * progress);
-            const auto alpha = juce::jlimit(0.0f, 1.0f, (1.0f - progress) / 0.35f) * (external ? 1.0f : 0.55f);
+            const auto alpha = juce::jlimit(0.0f, 1.0f, (1.0f - progress) / 0.35f)
+                               * (external ? 0.22f + 0.78f * activity : 0.55f);
             if (alpha < 0.02f)
                 continue;
 
@@ -634,6 +681,22 @@ private:
         }
     }
 
+    void paintScale(juce::Graphics& g, const juce::AffineTransform& art) const
+    {
+        // The frequency axis the shards follow: boundaries of the eight slices, top = 20 kHz.
+        g.setFont(font(10.5f, Weight::semibold));
+        for (std::size_t edge = 0; edge <= faceRegions; ++edge)
+        {
+            const auto y = rowTop + static_cast<float>(edge) * rowHeight;
+            const auto a = juce::Point<float>(176.0f, y).transformedBy(art), b = juce::Point<float>(181.0f, y).transformedBy(art);
+            g.setColour(palette::dim);
+            g.drawLine(a.x, a.y, b.x, b.y, 1.0f);
+            g.setColour(palette::muted);
+            g.drawText(edgeLabel(1.0f - static_cast<float>(edge) / faceRegions),
+                       juce::Rectangle<float>(b.x + 3.0f, b.y - 7.0f, 30.0f, 14.0f), juce::Justification::centredLeft);
+        }
+    }
+
     void paintCaption(juce::Graphics& g, juce::Rectangle<float> bounds, bool external, bool delta) const
     {
         auto area = bounds.reduced(16.0f, 0.0f).removeFromBottom(54.0f);
@@ -651,17 +714,18 @@ private:
         {
             g.setColour(palette::muted);
             g.setFont(font(14.0f, Weight::semibold));
-            g.drawFittedText("Route a sidechain to\nunmask the vocal", area.toNearestInt(), juce::Justification::centred, 2);
+            g.drawFittedText("Route a sidechain to\nunmask the " + word(), area.toNearestInt(), juce::Justification::centred, 2);
             return;
         }
         const auto percent = juce::roundToInt(100.0f * hub.clarityShown);
         auto row = area.removeFromTop(30.0f);
         g.setColour(palette::text);
         g.setFont(font(28.0f, Weight::bold));
-        g.drawText(juce::String(percent) + "%", row.removeFromLeft(row.getWidth() * 0.5f), juce::Justification::centredRight);
+        g.drawText(juce::String(percent) + "%", row.removeFromLeft(row.getWidth() * 0.4f), juce::Justification::centredRight);
         g.setColour(palette::muted);
         g.setFont(font(13.0f, Weight::semibold));
-        g.drawText("  VOCAL CLARITY", row, juce::Justification::centredLeft);
+        g.drawText(juce::String("  ") + sourceNames[static_cast<std::size_t>(sourceIndex(params))] + " CLARITY", row,
+                   juce::Justification::centredLeft);
         g.setFont(font(13.0f));
         if (hub.maxCut < -0.25f)
         {
@@ -671,13 +735,35 @@ private:
         }
         else
         {
-            g.drawText(hub.vocalPresent ? "No cut needed right now" : "Waiting for the vocal",
+            g.drawText(hub.vocalPresent ? "No cut needed right now" : "Waiting for the " + word(),
                        area.removeFromTop(18.0f), juce::Justification::centred);
         }
     }
 
+    void showSourceMenu()
+    {
+        juce::PopupMenu menu;
+        menu.addSectionHeader("Making room for");
+        for (int index = 0; index < 7; ++index)
+            menu.addItem(index + 1, juce::String(sourceNames[static_cast<std::size_t>(index)])
+                                    + "   (" + sourceHints[static_cast<std::size_t>(index)] + ")",
+                         true, index == sourceIndex(params));
+        juce::Component::SafePointer<UnmaskFace> safe(this);
+        menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&source), [safe](int result)
+        {
+            if (safe != nullptr && result > 0)
+            {
+                safe->params.state.setProperty("sourceName", result - 1, nullptr);
+                safe->refreshSource();
+            }
+        });
+    }
+
+    juce::String word() const { return sourceWords[static_cast<std::size_t>(sourceIndex(params))]; }
+
     MeterHub& hub;
     juce::AudioProcessorValueTreeState& params;
+    juce::TextButton source;
     juce::Path head, neck, features, lips, lowerLip, mouth, mask, engraving;
     std::array<juce::Path, faceRegions * 2> shards;
     struct Drift { float x = 0.0f, y = 0.0f, z = 0.0f; };
@@ -1130,7 +1216,7 @@ public:
         : processor(p),
           hub(p),
           display(p, hub),
-          face(hub, p.params),
+          face(hub, p.params, look),
           mode(*p.params.getParameter("mode")),
           guard("WIDTH GUARD", palette::key, *p.params.getParameter("guard")),
           delta("DELTA", palette::collision, *p.params.getParameter("delta"), "DELTA IS ON"),
@@ -1254,7 +1340,7 @@ public:
         g.setFont(font(14.0f, Weight::semibold));
         g.drawText("COLLISION-AWARE SIDECHAIN EQ", 156, 40, 210, 18, juce::Justification::centredLeft);
         g.setColour(palette::dim);
-        g.drawText("v0.5.0", 156, 22, 60, 18, juce::Justification::centredLeft);
+        g.drawText("v0.5.1", 156, 22, 60, 18, juce::Justification::centredLeft);
 
         g.setColour(palette::edge);
         g.drawHorizontalLine(controlsTop - 6, 22.0f, static_cast<float>(getWidth()) - 22.0f);

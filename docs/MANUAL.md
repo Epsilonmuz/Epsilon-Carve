@@ -1,6 +1,6 @@
-# Epsilon Carve v0.5.0 — User Manual
+# Epsilon Carve v0.5.1 — User Manual
 
-> The full illustrated manual (recipes, creator's notes, diagrams, annotated screenshots) is **[Epsilon-Carve-v0.5.0-Manual.pdf](Epsilon-Carve-v0.5.0-Manual.pdf)**. This page is the quick text version.
+> The full illustrated manual (recipes, creator's notes, diagrams, annotated screenshots) is **[Epsilon-Carve-v0.5.1-Manual.pdf](Epsilon-Carve-v0.5.0-Manual.pdf)**. This page is the quick text version.
 
 Epsilon Carve makes room for one sound inside another. You put it on the sound that needs to step aside (the **track**, usually the beat or an instrument bus) and feed it the sound that needs space (the **sidechain**, usually the vocal). Whenever the sidechain plays, Carve dips the track at the sidechain's frequencies and lets go when it stops. Nothing is delayed: Carve adds zero latency, so it is safe while recording and monitoring live.
 
@@ -12,15 +12,14 @@ Carve opens in **Simple** view: Low Cut, Amount and High Cut, plus the Collision
 
 The panel on the left is the quickest way to read Carve.
 
-- **The face is your vocal** (the sidechain), drawn in the sidechain's cyan.
-- **The mask is the beat** (the track), in the track's amber, covering the face wherever the beat is burying the vocal.
-- The mask is split into **eight shards from top to bottom**: forehead = air (8–20 kHz), brow = 4–8 kHz, eyes = 2–4 kHz, cheeks = 1–2 kHz, nose = 500 Hz–1 kHz, upper lip = 250–500 Hz, mouth = 100–250 Hz, chin = 20–100 Hz.
-- **When nothing is carved, the mask is whole.** As you raise Amount, each shard lifts away in proportion to how much of that range's masking Carve has removed. A shard that stays put tells you something: either that range is outside your Low/High Cut, or the beat is still covering the vocal there.
-- **Vocal Clarity %** is the share of the vocal that is clear of the beat right now (weighted by how loud the vocal is in each band). It is calculated the same way whether you are in Simple or Advanced view.
-- Below it, **Peak cut** shows the deepest cut and its frequency.
-- With no sidechain routed, the face stays dim and asks you to route one. With Delta on, it says **DELTA ON**.
+- **The face is your sidechain**: the sound that needs room. Use the picker at the top right of the panel (**Vocal, Kick, Snare, 808 / Bass, Lead, Voice-over, Other**) to name it. The picker only changes labels and suggests a matching preset.
+- **The mask is the track** covering it, in the track's amber.
+- **The face is a frequency scale.** Top to bottom runs from 20 kHz down to 20 Hz on a log scale, in eight equal slices of 1.25 octaves: 8.4–20 kHz, 3.6–8.4 kHz, 1.5–3.6 kHz, 632 Hz–1.5 kHz, 267–632 Hz, 112–267 Hz, 47–112 Hz, 20–47 Hz. The slice edges are printed beside the face.
+- **Each shard shows only its own slice.** It lifts by exactly the share of that slice's masking that Carve has removed: half the masking gone, half the lift. A shard stays in place when its slice is outside your Low Cut / High Cut, or when the track is still covering the sidechain there.
+- **A faint, still shard** means the sidechain has almost nothing in that slice, so there is nothing to unmask there.
+- **Clarity %** is how much of the sidechain is clear of the track right now, weighted by where the sidechain is loudest. **Peak cut** shows the deepest cut and its frequency.
 
-How it is calculated: in every band, Carve compares the beat's level (after the cut) with the vocal's level. The vocal counts as fully clear when the beat is 9 dB or more below it (the same clearance Collision mode aims for) and fully buried when the beat is 3 dB or more above it. The mask compares that with what the masking would be with no cut at all.
+How it is calculated: in each of Carve's 32 bands, Carve compares the track's level, after the cut, with the sidechain's level. The sidechain counts as clear when the track is 9 dB or more below it (the clearance Collision aims for) and buried when the track is 3 dB or more above it. Bands are weighted by the sidechain's level (anything more than 36 dB below its loudest band is ignored) and shared between neighbouring slices by how much of each band's frequency span falls in each slice. Shards lift quickly and settle back slowly, and the face holds its last state while the sidechain is silent.
 
 ## The display
 

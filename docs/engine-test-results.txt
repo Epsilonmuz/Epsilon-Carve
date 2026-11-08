@@ -28,6 +28,6 @@
 [PASS] no sidechain bus -> self (classic) fallback, cut -7.59 dB
 == CPU (48 kHz stereo, 256-sample blocks)
    classic: 2.99% of one core
-   collision: 3.29% of one core
+   collision: 3.21% of one core
 
 0 failure(s)

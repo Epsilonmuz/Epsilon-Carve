@@ -1,22 +1,30 @@
 # Epsilon Carve
 
-**Unmask your vocal. Carve only where the beat is in the way.**
+**Unmask what matters. Carve only where the track is in the way.**
 
 ![Epsilon Carve v0.5.0: the Unmask face beside the collision display, with seven controls below](docs/epsilon-carve-v0.5.0.png)
 
 ![As Amount goes up, the beat-coloured mask lifts off the vocal's face shard by shard](docs/carve-unmask.gif)
 
-*Both rendered by the v0.5.0 plugin itself (Vocal Space preset, synthetic vocal over a beat).*
+*Both rendered by the plugin itself (Vocal Space preset, synthetic vocal over a beat).*
 
-Epsilon Carve is a zero-latency, 32-band sidechain EQ from **Epsilon Sounds**. Put it on the beat, send it the vocal, and it carves space for the vocal in real time. **Collision mode** listens to both tracks and cuts only where the beat is loud enough to cover the vocal. The **Unmask face** shows the result: the face is your vocal, the mask is the beat, and each shard of the mask lifts away as Carve clears that part of the spectrum.
+Epsilon Carve is a zero-latency, 32-band sidechain EQ from **Epsilon Sounds**. Put it on the beat, send it the vocal, and it carves space for the vocal in real time. **Collision mode** listens to both tracks and cuts only where the beat is loud enough to cover the vocal. The **Unmask face** shows the result: the face is whatever needs room (a vocal, a kick, a lead), the mask is the track covering it, and each shard of the mask lifts away as Carve clears that part of the spectrum.
 
-**[Download v0.5.0 for Projucer / Xcode](Epsilon-Carve-v0.5.0-Projucer.zip)** (JUCE 9.0.5 included) · [Source only](Epsilon-Carve-v0.5.0-Source.zip) · **[Illustrated manual (PDF, 22 pages)](docs/Epsilon-Carve-v0.5.0-Manual.pdf)** · [Quick manual](docs/MANUAL.md) · [What's new](#whats-new-in-v050) · [FL Studio setup](#fl-studio-setup) · [Build](#build) · [Test results](#test-results)
+**[Download v0.5.1 for Projucer / Xcode](Epsilon-Carve-v0.5.1-Projucer.zip)** (JUCE 9.0.5 included) · [Source only](Epsilon-Carve-v0.5.1-Source.zip) · **[Illustrated manual (PDF, 22 pages)](docs/Epsilon-Carve-v0.5.1-Manual.pdf)** · [Quick manual](docs/MANUAL.md) · [What's new](#whats-new-in-v051) · [FL Studio setup](#fl-studio-setup) · [Build](#build) · [Test results](#test-results)
+
+## What's new in v0.5.1
+
+| | |
+| --- | --- |
+| **The face is a true frequency scale** | Top to bottom = 20 kHz down to 20 Hz on a log scale, in eight equal 1.25-octave slices, with the slice edges printed beside the face. Each shard is driven only by its own slice (bands on a boundary are shared by how much of them falls in each slice), and it lifts by exactly the share of that slice's masking Carve has removed. A slice with nothing of the sidechain in it shows as a faint, still shard instead of copying its neighbours. |
+| **Making room for: Vocal, Kick, Snare, 808 / Bass, Lead, Voice-over, Other** | A picker on the face sets the labels ("KICK CLARITY") and suggests the matching preset. It changes no sound, and it is saved with the session. |
+| **Clarity** | "Vocal Clarity" is now "Clarity" for whatever is in the sidechain. |
 
 ## What's new in v0.5.0
 
 | | |
 | --- | --- |
-| **Unmask face** | An original line-art face (the vocal) under a cracked mask (the beat). Eight shards, air at the forehead down to lows at the chin. The mask is whole when nothing is carved and lifts shard by shard as each range is cleared. **Vocal Clarity %** shows how much of the vocal is clear of the beat right now. |
+| **Unmask face** | An original line-art face (the vocal) under a cracked mask (the beat). Eight shards, air at the forehead down to lows at the chin. The mask is whole when nothing is carved and lifts shard by shard as each range is cleared. **Clarity %** shows how much of the sidechain is clear of the track right now. |
 | **Simple and Advanced views** | Opens with just Low Cut, Amount and High Cut. **Show Advanced** reveals Sensitivity, Attack, Release, Mix, Width Guard and Delta. The view is saved with the session. |
 | **Stronger Collision mode** | Uncovers buried, quieter parts of the vocal too. At 100% it leaves about 24% of the vocal masked, vs 39% in v0.4.0 and 37% for Classic. |
 | **High-resolution analyser** | 4096-point FFT with 1/6-octave smoothing for both spectra, instead of 32 points. |
@@ -41,7 +49,7 @@ Parameter IDs are unchanged since v0.3.0, so saved sessions load.
 | *Advanced:* **Width Guard** | Cut the centre only, keep the sides. | On for wide beats |
 | *Advanced:* **Delta** | Hear only what Carve removes. Turn it off before you bounce. | Off |
 
-Full explanations, including how the face is calculated: **[docs/MANUAL.md](docs/MANUAL.md)**.
+Full explanations, including how the face is calculated: **[the illustrated manual](docs/Epsilon-Carve-v0.5.1-Manual.pdf)** or [docs/MANUAL.md](docs/MANUAL.md).
 
 ## FL Studio setup
 
@@ -80,4 +88,4 @@ Run on Linux for this release. The Mac build and FL Studio listening pass are st
 - Engine: 32 log-spaced bands, 20 Hz–20 kHz, trapezoidal state-variable filters ([Simper](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf)), constant-octave bandwidth up to Nyquist. Masking-aware cutting follows the idea of masking-reduction EQ (Hafezi & Reiss, [*Autonomous multitrack equalization based on masking reduction*](https://www.aes.org/e-lib/browse.cfm?elib=17637), JAES 2015).
 - Font: Barlow Semi Condensed © The Barlow Project Authors, SIL Open Font License 1.1 (`Resources/Barlow-OFL.txt`).
 
-Older versions: [v0.4.0 Projucer](Epsilon-Carve-v0.4.0-Projucer.zip) · [v0.4.0 source](Epsilon-Carve-v0.4.0-Source.zip) · [v0.3.0 Projucer](Epsilon-Carve-v0.3.0-Projucer.zip) · [v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip) · [v0.2.0](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1](Epsilon-Carve-v0.1-Source.zip)
+Older versions: [v0.5.0 Projucer](Epsilon-Carve-v0.5.0-Projucer.zip) · [v0.4.0 Projucer](Epsilon-Carve-v0.4.0-Projucer.zip) · [v0.4.0 source](Epsilon-Carve-v0.4.0-Source.zip) · [v0.3.0 Projucer](Epsilon-Carve-v0.3.0-Projucer.zip) · [v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip) · [v0.2.0](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1](Epsilon-Carve-v0.1-Source.zip)

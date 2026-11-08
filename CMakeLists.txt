@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(EpsilonCarve VERSION 0.5.0 LANGUAGES C CXX)
+project(EpsilonCarve VERSION 0.5.1 LANGUAGES C CXX)
 
 # macOS: 12.0 target and JUCE 9.0.5 (bundled in ./JUCE). Older targets failed in the VST3 manifest helper.
 set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS version")

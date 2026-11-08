@@ -41,7 +41,7 @@ jobs:
           cp -R "$(find build -type d -name 'Epsilon Carve.vst3' | head -1)" out/
           cp -R "$(find build -type d -name 'Epsilon Carve.component' | head -1)" out/
           cat > out/INSTALL.txt <<'TXT'
-          Epsilon Carve v0.5.0 (unsigned test build)
+          Epsilon Carve v0.5.1 (unsigned test build)
           1. Copy "Epsilon Carve.vst3" to ~/Library/Audio/Plug-Ins/VST3/
              and "Epsilon Carve.component" to ~/Library/Audio/Plug-Ins/Components/
           2. This build is not notarised. Remove the download quarantine in Terminal:
@@ -52,5 +52,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Epsilon-Carve-v0.5.0-macOS
+          name: Epsilon-Carve-v0.5.1-macOS
           path: out
