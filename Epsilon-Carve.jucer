@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="A2Nupn" name="Epsilon Carve" projectType="audioplug" version="0.4.0"
+<JUCERPROJECT id="A2Nupn" name="Epsilon Carve" projectType="audioplug" version="0.5.0"
               companyName="Epsilon Sounds" bundleIdentifier="com.epsilonsounds.carve"
               pluginName="Epsilon Carve" pluginDesc="Collision-aware sidechain EQ"
               pluginManufacturer="Epsilon Sounds" pluginManufacturerCode="EpsS"
@@ -18,6 +18,12 @@
             file="Source/PluginProcessor.cpp"/>
       <FILE id="X7tbtx" name="PluginProcessor.h" compile="0" resource="0"
             file="Source/PluginProcessor.h"/>
+    </GROUP>
+    <GROUP id="RsGr01" name="Resources">
+      <FILE id="FnMd01" name="BarlowSemiCondensed-Medium.ttf" compile="0" resource="1" file="Resources/BarlowSemiCondensed-Medium.ttf"/>
+      <FILE id="FnSb01" name="BarlowSemiCondensed-SemiBold.ttf" compile="0" resource="1" file="Resources/BarlowSemiCondensed-SemiBold.ttf"/>
+      <FILE id="FnBd01" name="BarlowSemiCondensed-Bold.ttf" compile="0" resource="1" file="Resources/BarlowSemiCondensed-Bold.ttf"/>
+      <FILE id="FnLc01" name="Barlow-OFL.txt" compile="0" resource="0" file="Resources/Barlow-OFL.txt"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -41,6 +47,7 @@
         <MODULEPATH id="juce_audio_utils" path="JUCE/modules"/>
         <MODULEPATH id="juce_core" path="JUCE/modules"/>
         <MODULEPATH id="juce_data_structures" path="JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="JUCE/modules"/>
         <MODULEPATH id="juce_events" path="JUCE/modules"/>
         <MODULEPATH id="juce_graphics" path="JUCE/modules"/>
         <MODULEPATH id="juce_gui_basics" path="JUCE/modules"/>
@@ -62,6 +69,7 @@
         <MODULEPATH id="juce_audio_utils" path="JUCE/modules"/>
         <MODULEPATH id="juce_core" path="JUCE/modules"/>
         <MODULEPATH id="juce_data_structures" path="JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="JUCE/modules"/>
         <MODULEPATH id="juce_events" path="JUCE/modules"/>
         <MODULEPATH id="juce_graphics" path="JUCE/modules"/>
         <MODULEPATH id="juce_gui_basics" path="JUCE/modules"/>
@@ -83,6 +91,7 @@
         <MODULEPATH id="juce_audio_utils" path="JUCE/modules"/>
         <MODULEPATH id="juce_core" path="JUCE/modules"/>
         <MODULEPATH id="juce_data_structures" path="JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="JUCE/modules"/>
         <MODULEPATH id="juce_events" path="JUCE/modules"/>
         <MODULEPATH id="juce_graphics" path="JUCE/modules"/>
         <MODULEPATH id="juce_gui_basics" path="JUCE/modules"/>
@@ -102,6 +111,7 @@
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>

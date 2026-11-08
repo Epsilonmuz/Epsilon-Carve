@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(EpsilonCarve VERSION 0.4.0 LANGUAGES C CXX)
+project(EpsilonCarve VERSION 0.5.0 LANGUAGES C CXX)
 
 # macOS: 12.0 target and JUCE 9.0.5 (bundled in ./JUCE). Older targets failed in the VST3 manifest helper.
 set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS version")
@@ -28,6 +28,12 @@ juce_add_plugin(EpsilonCarve
     DESCRIPTION "Collision-aware sidechain EQ"
 )
 juce_generate_juce_header(EpsilonCarve)
+juce_add_binary_data(CarveAssets SOURCES
+    Resources/BarlowSemiCondensed-Medium.ttf
+    Resources/BarlowSemiCondensed-SemiBold.ttf
+    Resources/BarlowSemiCondensed-Bold.ttf
+)
+set_target_properties(CarveAssets PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_sources(EpsilonCarve PRIVATE
     Source/CarveEngine.cpp
     Source/PluginProcessor.cpp
@@ -40,7 +46,9 @@ target_compile_definitions(EpsilonCarve PUBLIC
     JUCE_VST3_CAN_REPLACE_VST2=0
 )
 target_link_libraries(EpsilonCarve PRIVATE
+    CarveAssets
     juce::juce_audio_utils
+    juce::juce_dsp
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags

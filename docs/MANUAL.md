@@ -1,6 +1,24 @@
-# Epsilon Carve v0.4.0 — User Manual
+# Epsilon Carve v0.5.0 — User Manual
 
 Epsilon Carve makes room for one sound inside another. You put it on the sound that needs to step aside (the **track**, usually the beat or an instrument bus) and feed it the sound that needs space (the **sidechain**, usually the vocal). Whenever the sidechain plays, Carve dips the track at the sidechain's frequencies and lets go when it stops. Nothing is delayed: Carve adds zero latency, so it is safe while recording and monitoring live.
+
+## Simple and Advanced views
+
+Carve opens in **Simple** view: Low Cut, Amount and High Cut, plus the Collision/Classic switch and presets. That is all most sessions need. Click **Show Advanced** to add Sensitivity, Attack, Release, Mix, Width Guard and Delta. Carve remembers the view with your session.
+
+## The Unmask face
+
+The panel on the left is the quickest way to read Carve.
+
+- **The face is your vocal** (the sidechain), drawn in the sidechain's cyan.
+- **The mask is the beat** (the track), in the track's amber, covering the face wherever the beat is burying the vocal.
+- The mask is split into **eight shards from top to bottom**: forehead = air (8–20 kHz), brow = 4–8 kHz, eyes = 2–4 kHz, cheeks = 1–2 kHz, nose = 500 Hz–1 kHz, upper lip = 250–500 Hz, mouth = 100–250 Hz, chin = 20–100 Hz.
+- **When nothing is carved, the mask is whole.** As you raise Amount, each shard lifts away in proportion to how much of that range's masking Carve has removed. A shard that stays put tells you something: either that range is outside your Low/High Cut, or the beat is still covering the vocal there.
+- **Vocal Clarity %** is the share of the vocal that is clear of the beat right now (weighted by how loud the vocal is in each band). It is calculated the same way whether you are in Simple or Advanced view.
+- Below it, **Peak cut** shows the deepest cut and its frequency.
+- With no sidechain routed, the face stays dim and asks you to route one. With Delta on, it says **DELTA ON**.
+
+How it is calculated: in every band, Carve compares the beat's level (after the cut) with the vocal's level. The vocal counts as fully clear when the beat is 9 dB or more below it (the same clearance Collision mode aims for) and fully buried when the beat is 3 dB or more above it. The mask compares that with what the masking would be with no cut at all.
 
 ## The display
 
@@ -9,11 +27,12 @@ Epsilon Carve makes room for one sound inside another. You put it on the sound t
 | **Amber area** (TRACK) | Level of the track in each of Carve's 32 bands, before any cut. |
 | **Cyan line** (SIDECHAIN) | Level of the sidechain in each band. |
 | **Coral columns** (COLLISION) | Frequencies where Carve is cutting right now. Brighter means deeper. |
+| **Spectrum detail** | Both spectra come from a 4096-point analyser with 1/6-octave smoothing, so you see individual notes and harmonics. |
 | **Lower graph, white line** | The exact cut being applied, in dB, worked out from the live filter state (all 32 sections, Mix included). |
 | **Dashed cyan line** | Shown when Width Guard is on: the cut applied to the stereo sides (flat at 0 dB means the width is untouched). |
 | **White handles** | Low Cut and High Cut. Drag them left and right. The shaded area outside them is never cut. |
 | **PEAK CUT** | The deepest cut at this moment and its frequency. |
-| **Status badge** | **SIDECHAIN LIVE**: the sidechain is arriving. **SIDECHAIN QUIET**: the sidechain is routed but silent. **NO SIDECHAIN ROUTED / SELF**: the host has not connected a sidechain, so the track drives itself. **SELF MODE**: you chose Self Mode. |
+| **Status badge** | **SIDECHAIN LIVE**: the sidechain is arriving. **SIDECHAIN QUIET**: the sidechain is routed but silent. **NO SIDECHAIN ROUTED**: the host has not connected a sidechain, so the track drives itself. **INTERNAL SIDECHAIN**: you chose Internal. |
 | **Bottom line** | Hover anywhere on the graph to read the frequency, track level, sidechain level and cut at that point. |
 
 ## The controls
@@ -34,16 +53,16 @@ Epsilon Carve makes room for one sound inside another. You put it on the sound t
 
 **Collision / Classic** (default Collision).
 
-- **Collision** listens to both the track and the sidechain. In each band it asks: is the track loud enough here to cover the sidechain? If not, the band is left alone. If yes, it cuts just enough for the sidechain to sit about 9 dB clear, never more than Classic would. Result: the beat stays fuller, especially in quieter sections, and the cuts land exactly where the clash is.
+- **Collision** listens to both the track and the sidechain. In each band it asks: is the track loud enough here to cover the sidechain? If not, the band is left alone. If yes, it cuts just enough for the sidechain to sit about 9 dB clear. Result: the beat stays fuller, especially in quieter sections, the cuts land exactly where the clash is, and at high Amount it can uncover quieter, buried parts of the vocal that Classic leaves covered.
 - **Classic** cuts in proportion to how loud the sidechain is in each band, whatever the track is doing. Use it for kick-vs-808 and snare pockets, where you want a predictable duck every hit.
 
 Collision needs a routed sidechain. Without one, Carve uses Classic behaviour automatically.
 
 **Width Guard** (default off). Carve works in Mid/Side. With Width Guard on, only the centre (Mid) of the track is cut; the sides keep their full level, so a wide beat stays wide while the vocal gets room in the middle where it sits. Switching it on and off glides over 30 ms, so it never clicks.
 
-**Delta** (default off). You hear only what Carve is removing. Use it to check that it is cutting the right part of the track, then turn it off. If you bounce with Delta on, you will export only the removed signal.
+**Delta** (default off). You hear only what Carve is removing. Use it to check that it is cutting the right part of the track, then turn it off. While Delta is on, the display border pulses coral with a banner, the face reads DELTA ON, and the Delta button stays visible even in Simple view, because bouncing with Delta on exports only the removed signal.
 
-**Sidechain In / Self Mode** (default Sidechain In). Sidechain In uses the routed sidechain. Self Mode makes the track carve itself: it becomes a 32-band dynamic EQ that tames whatever is loudest in the track, a quick way to calm a harsh or boomy bus.
+**Sidechain: External / Internal** (default External). External uses the routed sidechain. Internal makes the track carve itself: it becomes a 32-band dynamic EQ that tames whatever is loudest in the track, a quick way to calm a harsh or boomy bus.
 
 **Presets.** Use the arrows or the menu at the top. The presets are also exposed to your DAW as programs.
 
@@ -64,7 +83,7 @@ Collision needs a routed sidechain. Without one, Carve uses Classic behaviour au
 
 1. **Analysis.** Both the sidechain and (in Collision mode) the track pass through 32 band detectors spaced evenly on a log scale from 20 Hz to 20 kHz (about three per octave). Each detector is two cascaded band-pass filters, so a loud note in one band barely registers four octaves away (about −63 dB).
 2. **Envelopes.** Each band's level is followed with your Attack and Release times.
-3. **Decision.** Every 16 samples (a third of a millisecond) Carve works out how much each band should be cut. Classic: proportional to the sidechain level. Collision: the smaller of the Classic cut and the cut needed for 9 dB of clearance, ignoring sidechain bands more than 36 dB below its loudest band (they are inaudible anyway).
+3. **Decision.** Every 16 samples (a third of a millisecond) Carve works out how much each band should be cut. Classic: proportional to the sidechain level. Collision: the cut needed for 9 dB of clearance, capped by a ceiling that follows the sidechain's level three times more readily than Classic, and ignoring sidechain bands more than 36 dB below its loudest band (they are inaudible anyway).
 4. **Range.** The Low Cut and High Cut handles fade bands in and out smoothly, so a handle can sit between two bands.
 5. **Cutting.** The track is split into Mid and Side. Each passes through 32 cascaded dynamic cuts at the same frequencies (state-variable filters with fixed poles, so they cannot become unstable while moving). Each band's bandwidth is held constant in octaves up to the top of the audio range, so cuts are just as deep at 12 kHz as at 1 kHz. Cut depth changes are smoothed over 4 ms to avoid zipper noise.
 6. **Output.** Mid and Side are recombined, Mix is applied, and the result goes out with no delay. At Amount 0, or with a silent sidechain in Collision mode, the output is bit-for-bit identical to the input.

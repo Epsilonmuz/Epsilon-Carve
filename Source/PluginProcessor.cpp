@@ -103,6 +103,7 @@ bool EpsilonCarveAudioProcessor::isBusesLayoutSupported(const BusesLayout& layou
 void EpsilonCarveAudioProcessor::prepareToPlay(double sampleRate, int)
 {
     engine.prepare(sampleRate);
+    sampleRateForDisplay.store(sampleRate);
     setLatencySamples(0);
 }
 

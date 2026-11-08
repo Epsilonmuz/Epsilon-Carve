@@ -15,6 +15,7 @@
 #include <array>
 #include <atomic>
 #include <cstddef>
+#include <cstdint>
 
 namespace carve
 {
@@ -60,6 +61,7 @@ struct Settings
 struct BandReading
 {
     float triggerPeak = 0.0f;   // detector level of the trigger (linear)
+    float triggerEnvelope = 0.0f; // smoothed trigger level (same ballistics as the track)
     float targetPeak = 0.0f;    // detector level of the target (linear)
     float cutWeight = 0.0f;     // live EQ weight on the Mid channel
     float sideWeight = 0.0f;    // live EQ weight on the Side channel
@@ -100,6 +102,11 @@ public:
     // One audio producer and one editor consumer. The audio thread never waits.
     void setMeteringEnabled(bool enabled) noexcept;
     bool readMeterFrame(MeterFrame& frame) noexcept;
+
+    // Most recent raw samples (track Mid before the cut, and the key) for a display FFT.
+    // Lock-free: called from the editor while the audio thread keeps writing.
+    static constexpr std::size_t analyserSize = 8192;
+    int copyAnalyserSamples(float* track, float* key, int count) const noexcept;
 
 private:
     struct Coefficients
@@ -153,5 +160,8 @@ private:
     unsigned writeIndex = 0;
     unsigned readIndex = 2;
     std::atomic<unsigned> middle { 1 };
+
+    std::array<float, analyserSize> analyserTrack {}, analyserKey {};
+    std::atomic<std::uint32_t> analyserWrite { 0 };
 };
 }

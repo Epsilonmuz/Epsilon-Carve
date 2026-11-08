@@ -39,8 +39,18 @@ public:
     void getStateInformation(juce::MemoryBlock&) override;
     void setStateInformation(const void*, int size) override;
 
-    void setMeteringEnabled(bool enabled) noexcept { engine.setMeteringEnabled(enabled); }
+    // Counted, so a host that opens a new editor before closing the old one keeps the meters running.
+    void setMeteringEnabled(bool enabled) noexcept
+    {
+        const auto clients = (meteringClients += enabled ? 1 : -1);
+        engine.setMeteringEnabled(clients > 0);
+    }
     bool readMeterFrame(carve::MeterFrame& frame) noexcept { return engine.readMeterFrame(frame); }
+    int copyAnalyserSamples(float* track, float* key, int count) const noexcept
+    {
+        return engine.copyAnalyserSamples(track, key, count);
+    }
+    double getCurrentSampleRate() const noexcept { return sampleRateForDisplay.load(); }
 
     static const std::vector<CarvePreset>& presets();
 
@@ -50,6 +60,8 @@ private:
     static juce::AudioProcessorValueTreeState::ParameterLayout makeLayout();
 
     carve::Engine engine;
+    std::atomic<double> sampleRateForDisplay { 44100.0 };
+    std::atomic<int> meteringClients { 0 };
     int currentPreset = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EpsilonCarveAudioProcessor)
 };

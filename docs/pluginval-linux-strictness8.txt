@@ -1,5 +1,5 @@
 Started validating: /home/claude/linuxbuild/build/EpsilonCarve_artefacts/Release/VST3/Epsilon Carve.vst3
-Random seed: 0x73caef1
+Random seed: 0x4845ca5
 Validation started
 Strictness level: 8
 -----------------------------------------------------------------

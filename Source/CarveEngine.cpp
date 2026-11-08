@@ -20,6 +20,7 @@ constexpr float eqDamping = 1.0f / 2.0f;
 constexpr float overlapCompensation = 2.1f;
 constexpr float maxWeight = 0.93f;
 constexpr float detectorScale = 5.0f;
+constexpr float collisionReach = 3.0f;
 constexpr float presenceFloorDb = -62.0f;   // trigger below this (after Sensitivity) carves nothing
 constexpr float presenceKneeDb = 12.0f;
 constexpr int controlInterval = 16;
@@ -203,14 +204,17 @@ void Engine::updateDesired(const Settings& settings, bool collision) noexcept
         auto cutDb = maxCutDb * std::min(1.0f, band.triggerEnvelope * sensitivity * detectorScale);
         if (collision)
         {
-            // Collision: never deeper than Classic, and only as deep as needed for the trigger
+            // Collision: only as deep as needed for the trigger
             // to sit collisionClearanceDb (plus Sensitivity) above the target in this band.
             // Bands where the target is already quieter than the trigger are left untouched.
             const auto triggerDb = toDb(band.triggerEnvelope) + settings.sensitivityDb;
             const auto presence = std::clamp((triggerDb - gateDb) / presenceKneeDb, 0.0f, 1.0f);
             const auto needDb = toDb(band.targetEnvelope) - triggerDb
                                 + collisionClearanceDb + 2.0f * settings.sensitivityDb;
-            cutDb = std::min(cutDb, std::clamp(needDb, 0.0f, maxCutDb)) * presence;
+            // The ceiling reacts 3x more readily than Classic, so quiet but buried parts of the
+            // sidechain can still be uncovered (v0.5.0: reaches ~24% masked vs ~39% in v0.4.0).
+            const auto ceilingDb = maxCutDb * std::min(1.0f, band.triggerEnvelope * sensitivity * detectorScale * collisionReach);
+            cutDb = std::min(ceilingDb, std::clamp(needDb, 0.0f, maxCutDb)) * presence;
         }
         band.desiredWeight = weightForCut(cutDb * strength);
     }
@@ -266,13 +270,22 @@ void Engine::processSamples(const TargetChannels& target, int targetChannels,
             band.triggerEnvelope += (level > band.triggerEnvelope ? attack : release)
                                     * (level - band.triggerEnvelope);
 
-            if constexpr (Collision)
+            if constexpr (Collision || Metering)
             {
+                // Collision needs the track's band levels; the editor also uses them for the
+                // collision display and the unmasking face, so they are measured while it is open.
+                if (selfTriggered)
+                {
+                    band.targetEnvelope = band.triggerEnvelope;
+                }
+                else
+                {
                 auto own = std::abs(band.targetState2[0].bandpass(band.targetState[0].bandpass(inputL, band.detector), band.detector));
                 if (stereoTarget)
                     own = std::max(own, std::abs(band.targetState2[1].bandpass(band.targetState[1].bandpass(inputR, band.detector), band.detector)));
                 band.targetEnvelope += (own > band.targetEnvelope ? attack : release)
                                        * (own - band.targetEnvelope);
+                }
             }
             else if (selfTriggered)
             {
@@ -292,7 +305,17 @@ void Engine::processSamples(const TargetChannels& target, int targetChannels,
                 auto& reading = window.bands[index];
                 reading.triggerPeak = std::max(reading.triggerPeak, level);
                 reading.targetPeak = std::max(reading.targetPeak, band.targetEnvelope);
+                reading.triggerEnvelope = std::max(reading.triggerEnvelope, band.triggerEnvelope);
             }
+        }
+
+        if constexpr (Metering)
+        {
+            // Raw samples for the editor's high-resolution analyser (track before the cut, and key).
+            const auto slot = analyserWrite.load(std::memory_order_relaxed);
+            analyserTrack[slot & (analyserSize - 1)] = mid;
+            analyserKey[slot & (analyserSize - 1)] = stereoTrigger ? 0.5f * (keyL + keyR) : keyL;
+            analyserWrite.store(slot + 1, std::memory_order_release);
         }
 
         // Work with the removed part so a zero cut leaves the input bit-exact.
@@ -373,6 +396,22 @@ void Engine::publishMeterFrame(const Settings& settings) noexcept
     }
     meterSlots[writeIndex] = window;
     writeIndex = middle.exchange(writeIndex | readyBit, std::memory_order_acq_rel) & indexMask;
+}
+
+int Engine::copyAnalyserSamples(float* track, float* key, int count) const noexcept
+{
+    count = std::clamp(count, 0, static_cast<int>(analyserSize) / 2);
+    const auto end = analyserWrite.load(std::memory_order_acquire);
+    const auto available = static_cast<int>(std::min<std::uint32_t>(end, analyserSize / 2));
+    const auto start = end - static_cast<std::uint32_t>(count);
+    for (int index = 0; index < count; ++index)
+    {
+        const auto slot = (start + static_cast<std::uint32_t>(index)) & (analyserSize - 1);
+        const auto valid = index >= count - available;
+        track[index] = valid ? analyserTrack[slot] : 0.0f;
+        key[index] = valid ? analyserKey[slot] : 0.0f;
+    }
+    return available;
 }
 
 bool Engine::readMeterFrame(MeterFrame& frame) noexcept
