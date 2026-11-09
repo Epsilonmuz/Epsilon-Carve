@@ -4,6 +4,7 @@
 // frequency slices. Header-only; included by the component headers and PluginEditor.cpp.
 
 #include "PluginProcessor.h"
+#include "../Shared/epsilon_ui/EpsilonHeader.h"
 
 #include <BinaryData.h>
 #include <cmath>
@@ -12,13 +13,15 @@ namespace carveui
 {
 namespace palette
 {
-inline const juce::Colour background { 0xff090b0f };
-inline const juce::Colour panel      { 0xff10141b };
-inline const juce::Colour plot       { 0xff0b0e13 };
-inline const juce::Colour edge       { 0xff212937 };
-inline const juce::Colour text       { 0xffeef2f7 };
-inline const juce::Colour muted      { 0xff8b97aa };
-inline const juce::Colour dim        { 0xff4a5568 };
+// Epsilon Sounds design system v1 (Epsilon tier). Track / key / collision stay: they are the hero (mask and face).
+inline const epsilon_ui::Palette brand = epsilon_ui::palette (epsilon_ui::Tier::Epsilon);
+inline const juce::Colour background = brand.bg;
+inline const juce::Colour panel      = brand.surface;
+inline const juce::Colour plot       = brand.bg.darker (0.15f);
+inline const juce::Colour edge       = brand.line;
+inline const juce::Colour text       = brand.ink;
+inline const juce::Colour muted      = brand.inkMuted;
+inline const juce::Colour dim        = epsilon_ui::faint (brand);
 inline const juce::Colour track      { 0xfff2a541 };   // the signal being carved (the beat) - and the mask
 inline const juce::Colour key        { 0xff3fd0ff };   // the sidechain (the vocal) - and the face
 inline const juce::Colour collision  { 0xffff4d6d };   // where they collide and Carve cuts

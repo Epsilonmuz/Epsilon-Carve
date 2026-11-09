@@ -135,29 +135,12 @@ public:
     {
         g.fillAll(palette::background);
 
-        // Chiselled corner: the Carve signature
-        juce::Path notch;
-        notch.startNewSubPath(0.0f, 0.0f);
-        notch.lineTo(170.0f, 0.0f);
-        notch.lineTo(124.0f, 66.0f);
-        notch.lineTo(0.0f, 66.0f);
-        notch.closeSubPath();
-        g.setGradientFill(juce::ColourGradient(palette::collision.withAlpha(0.22f), 0.0f, 0.0f,
-                                               palette::collision.withAlpha(0.0f), 170.0f, 66.0f, false));
-        g.fillPath(notch);
-
-        g.setColour(palette::text);
-        g.setFont(font(14.0f, Weight::bold));
-        g.drawText(juce::CharPointer_UTF8("E\xce\xa3  EPSILON SOUNDS"), 24, 10, 160, 18, juce::Justification::centredLeft);
-        g.setFont(font(40.0f, Weight::bold));
-        g.drawText("CARVE", 22, 24, 130, 40, juce::Justification::centredLeft);
-        g.setColour(palette::collision);
-        g.fillRect(126.0f, 52.0f, 20.0f, 5.0f);
-        g.setColour(palette::muted);
-        g.setFont(font(14.0f, Weight::semibold));
-        g.drawText("COLLISION-AWARE SIDECHAIN EQ", 156, 40, 210, 18, juce::Justification::centredLeft);
+        // Epsilon Sounds product mark (shared design system)
+        const float markRight = epsilon_ui::drawProductMark(g, { 22.0f, 14.0f }, 1.0f, epsilon_ui::Tier::Epsilon, "Carve", "Collision-aware sidechain EQ",
+                                    [](float h, bool b) { return font(h, b ? Weight::bold : Weight::semibold); });
         g.setColour(palette::dim);
-        g.drawText("v" JucePlugin_VersionString, 156, 22, 60, 18, juce::Justification::centredLeft);
+        g.setFont(font(12.0f, Weight::semibold));
+        g.drawText("v" JucePlugin_VersionString, (int) markRight + 10, 14, 60, 18, juce::Justification::centredLeft);
 
         g.setColour(palette::edge);
         g.drawHorizontalLine(controlsTop - 6, 22.0f, static_cast<float>(getWidth()) - 22.0f);
