@@ -25,13 +25,13 @@ juce_add_plugin(EpsilonCarve
     AU_MAIN_TYPE kAudioUnitType_Effect
     FORMATS ${carve_formats}
     PRODUCT_NAME "Epsilon Carve"
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Resources/AppIcon.png"
     DESCRIPTION "Collision-aware sidechain EQ"
 )
 juce_generate_juce_header(EpsilonCarve)
 juce_add_binary_data(CarveAssets SOURCES
-    Resources/BarlowSemiCondensed-Medium.ttf
-    Resources/BarlowSemiCondensed-SemiBold.ttf
-    Resources/BarlowSemiCondensed-Bold.ttf
+    Resources/EpsilonDial-Regular.ttf
+    Resources/EpsilonDial-Bold.ttf
 )
 set_target_properties(CarveAssets PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_sources(EpsilonCarve PRIVATE

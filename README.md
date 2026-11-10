@@ -49,7 +49,7 @@ From the expert review's action plan.
 | **Stronger Collision mode** | Uncovers buried, quieter parts of the vocal too. At 100% it leaves about 24% of the vocal masked, vs 39% in v0.4.0 and 37% for Classic. |
 | **High-resolution analyser** | 4096-point FFT with 1/6-octave smoothing for both spectra, instead of 32 points. |
 | **Delta safety** | While Delta is on, the display pulses coral with a banner, the face says DELTA ON, and the Delta button stays visible even in Simple view. |
-| **Look** | Embedded Barlow Semi Condensed typeface (SIL Open Font License), machined knobs with tick rings, stronger collision glow. |
+| **Look** | Epsilon Dial, the Epsilon Sounds house typeface, machined knobs with tick rings, stronger collision glow. |
 | **Clearer naming** | "Self Mode" is now **Sidechain: Internal / External**. |
 | **Fix** | Meters keep running if a host opens a new editor window before closing the old one. |
 
@@ -112,6 +112,6 @@ Run on Linux for this release. The Mac build and FL Studio listening pass are st
 
 - Epsilon Carve, its face artwork and its interface are original designs. It is not affiliated with any other company's product.
 - Engine: 32 log-spaced bands, 20 Hz–20 kHz, trapezoidal state-variable filters ([Simper](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf)), constant-octave bandwidth up to Nyquist. Masking-aware cutting follows the idea of masking-reduction EQ (Hafezi & Reiss, [*Autonomous multitrack equalization based on masking reduction*](https://www.aes.org/e-lib/browse.cfm?elib=17637), JAES 2015).
-- Font: Barlow Semi Condensed © The Barlow Project Authors, SIL Open Font License 1.1 (`Resources/Barlow-OFL.txt`).
+- Font: Epsilon Dial © Epsilon Sounds, proprietary (`Resources/EpsilonDial-LICENSE.txt`).
 
 Older versions: [v0.5.1 Projucer](Epsilon-Carve-v0.5.1-Projucer.zip) · [v0.5.0 Projucer](Epsilon-Carve-v0.5.0-Projucer.zip) · [v0.4.0 Projucer](Epsilon-Carve-v0.4.0-Projucer.zip) · [v0.4.0 source](Epsilon-Carve-v0.4.0-Source.zip) · [v0.3.0 Projucer](Epsilon-Carve-v0.3.0-Projucer.zip) · [v0.3.0 source](Epsilon-Carve-v0.3.0-Source.zip) · [v0.2.0](Epsilon-Carve-v0.2.0-Source.zip) · [v0.1](Epsilon-Carve-v0.1-Source.zip)
