@@ -2,6 +2,11 @@
 
 **Unmask what matters. Carve only where the track is in the way.**
 
+## Install (no build needed)
+
+**Mac (Intel and Apple Silicon):** download [Epsilon Carve for Mac](https://github.com/Epsilonmuz/Epsilon-Carve/releases/latest/download/Epsilon-Carve-macOS-Installer.pkg). Double-click it: the VST3 goes to `/Library/Audio/Plug-Ins/VST3` and the Audio Unit to `/Library/Audio/Plug-Ins/Components`. Then rescan in your DAW (FL Studio: Options > Manage plugins > Find installed plugins). The first time, macOS may say it can't check the installer (it isn't notarised by Apple): click Done, then System Settings > Privacy & Security > **Open Anyway**. No Terminal commands needed. The link always gives the newest build of `main`; it is rebuilt, test-installed on GitHub's Mac and replaced on every push.
+
+
 ![Epsilon Carve v0.5.0: the Unmask face beside the collision display, with seven controls below](docs/epsilon-carve-v0.5.0.png)
 
 ![As Amount goes up, the beat-coloured mask lifts off the vocal's face shard by shard](docs/carve-unmask.gif)
